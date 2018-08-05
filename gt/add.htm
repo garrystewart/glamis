@@ -8,7 +8,7 @@
 <body>
   <label for "ipt-make">Make</label>
   <input type="text" id="ipt-make">
-  <label for "ipt-model">model</label>
+  <label for "ipt-model">Model</label>
   <input type="text" id="ipt-model">
   <button id="btn-add">Add car</button>
   <script src="../js/jquery-3.3.1.min.js"></script>
@@ -28,7 +28,7 @@
         'make': $('#ipt-make').val(),
         'model': $('#ipt-model').val()
       }
-      $.post('asp/add.asp', objCar, function () {
+      $.post('asp/add.asp', {data: JSON.stringify(objCar)}, function () {
         userAlert('car added');
       }).fail(function () {
         userAlert('asp fail', true);

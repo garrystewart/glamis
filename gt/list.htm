@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Gran Turismo Sport</title>
+</head>
+
+<body>
+  <script src="../js/jquery-3.3.1.min.js"></script>
+  <script src="../js/functions.js"></script>
+  <script>
+    $.getJSON('asp/list.asp', function (list) {
+
+    }).fail(function () {
+      userAlert('asp fail', true);
+    });
+  </script>
+</body>
+
+</html>
