@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Gran Turismo Sport</title>
+</head>
+
+<body>
+  <label for "ipt-make">Make</label>
+  <input type="text" id="ipt-make">
+  <label for "ipt-model">model</label>
+  <input type="text" id="ipt-model">
+  <button id="btn-add">Add car</button>
+  <script src="../js/jquery-3.3.1.min.js"></script>
+  <script>
+    $('#btn-add').click(function () {
+      // validation
+      if (!$('#ipt-make').val()) {
+        userAlert('make not entered');
+        return;
+      }
+      if (!$('#ipt-model').val()) {
+        userAlert('model not entered');
+        return;
+      }
+      // end of validation
+      var objCar = {
+        'make': $('#ipt-make').val(),
+        'model': $('#ipt-model').val()
+      }
+      $.post('asp/add.asp', objCar, function () {
+        userAlert('car added');
+      }).fail(function () {
+        userAlert('asp fail', true);
+      });
+    });
+
+    function userAlert(msg, warn) {
+      if (warn){
+        console.warn(msg);
+      } else {
+        console.log(msg);
+      }
+      alert(msg);
+    }
+  </script>
+</body>
+
+</html>
