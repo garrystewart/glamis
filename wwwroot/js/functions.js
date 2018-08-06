@@ -1,8 +1,5 @@
-function userAlert(msg, warn) {
-	if (warn) {
-		console.warn(msg);
-	} else {
-		console.log(msg);
-	}
-	alert(msg);
+function ajaxFailAlert(jqxhr){
+	jqxhr = JSON.parse(jqxhr.responseText);
+	console.warn(jqxhr.message);
+	alert(jqxhr.message);
 }

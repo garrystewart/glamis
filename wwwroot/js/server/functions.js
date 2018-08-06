@@ -45,7 +45,6 @@ function openTextFile(path, text) {
             return false;
         }
     }
-
 }
 
 function fileExists(path) {

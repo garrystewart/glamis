@@ -1,20 +1,26 @@
-<%@ Language= "Javascript" %> 
-<script language="javascript" runat="server" src="../../js/server/json2.js"></script>
-<script language="javascript" runat="server" src="../../js/server/functions.js"></script>
-<script language="javascript" runat="server" src="../../js/prototypes.js"></script>
-<script language="javascript" runat="server">
-    var data = Request.Form('data');
-    var path = '/gt/data/cars.json';
-    if (fileExists(path)) {
-        var cars_json = openTextFile(path);
-        for (var car in cars_json){
-            if (cars_json[car].make === data.make && cars_json[car].model === data.model){
-                httpResponse(400, 'car already added');
+<%@ Language= "Javascript" %>
+    <script language="javascript" runat="server" src="../../js/server/json2.js"></script>
+    <script language="javascript" runat="server" src="../../js/server/functions.js"></script>
+    <script language="javascript" runat="server" src="../../js/server/prototypes.js"></script>
+    <script language="javascript" runat="server" src="../../js/prototypes.js"></script>
+    <script language="javascript" runat="server">
+        var form = JSON.parse(Request.Form('data').item());
+        var path = '/gt/data/cars.json';
+        if (fileExists(path)) {
+            var cars = JSON.parse(openTextFile(path));
+            for (var make in cars) {
+                if (make.toLowerCase() === form.make.toLowerCase() && Object.keys(cars[make]).toString().toLowerCase() ===
+                    form.model.toLowerCase()) {
+                    httpResponse(400, 'car already added');
+                }
             }
+            cars[form.make] = {};
+            cars[form.make][form.model] = {};
+            openTextFile(path, JSON.stringify(cars));
+        } else {
+            var cars = {};
+            cars[form.make] = {};
+            cars[form.make][form.model] = {};
+            createTextFile(path, JSON.stringify(cars));
         }
-        cars_json[data.make].model = data.model;
-        openTextFile(path, cars_json);
-    } else {
-        createTextFile(path, data);
-    }
-</script>
+    </script>
