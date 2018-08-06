@@ -33,7 +33,11 @@
 				}
 			}
 		}).fail(function (jqxhr) {
-			ajaxFailAlert(jqxhr);
+			if (jqxhr.status === 404){
+				alert('no cars found');
+			} else {
+				ajaxFailAlert(jqxhr);
+			}
 		});
 	</script>
 </body>
