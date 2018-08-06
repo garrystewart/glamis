@@ -1,5 +1,8 @@
 function ajaxFailAlert(jqxhr){
-	jqxhr = JSON.parse(jqxhr.responseText);
-	console.warn(jqxhr.message);
-	alert(jqxhr.message);
+	console.log(jqxhr);
+	if (jqxhr.status === 500) {
+		alert(jqxhr.status + ' ' + jqxhr.statusText);	
+	} else {
+		jqxhr = JSON.parse(jqxhr.responseText);
+	}
 }
