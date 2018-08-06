@@ -6,6 +6,7 @@
 </head>
 
 <body>
+	<a href="index.htm">Back</a>
 	<label for "ipt-make">Make</label>
 	<input type="text" id="ipt-make">
 	<label for "ipt-model">Model</label>
@@ -33,8 +34,8 @@
 				data: JSON.stringify(car)
 			}, function () {
 				alert('car added');
-			}).fail(function (jqXHR) {
-				ajaxFailAlert(jqXHR);
+			}).fail(function (jqxhr) {
+				ajaxFailAlert(jqxhr);
 			});
 		});
 	</script>
