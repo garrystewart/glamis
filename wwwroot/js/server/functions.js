@@ -8,7 +8,7 @@ function createTextFile(path, text) {
             createFolderStructure(path);
             fsoCreateTextFile();
         } catch (error) {
-            return false;
+            Response.Write(JSON.stringify(error));
         }
     }
 
@@ -90,7 +90,7 @@ function createFolderStructure(path) {
         }
         return true;
     } catch (error) {
-        return false;
+        Response.Write(JSON.stringify(error));
     }
 }
 
