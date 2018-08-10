@@ -17,9 +17,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
         }
  }
 "@
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 
-# change adapter type from public to private - allows remote connections
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicyGet-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
-
-# don't know if this is actually needed
-Enable-PSRemoting –force
+# allows remote connections
+netsh advfirewall firewall add rule name="Open Port 5985" dir=in action=allow protocol=TCP localport=5985
