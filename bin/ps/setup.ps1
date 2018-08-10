@@ -9,3 +9,9 @@ Set-WebConfigurationProperty -Filter system.webServer/asp -Name scriptErrorSentT
 Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\WebManagement\Server -Name EnableRemoteManagement -Value 1
 Set-Service -name WMSVC -StartupType Automatic
 Start-service WMSVC
+
+# setup iis ftp publishing
+New-WebBinding "Default Web Site"-Port 21 -Protocol ftp -IPAddress *
+Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.authentication.basicAuthentication.enabled -Value $true
+Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.ssl.controlChannelPolicy -Value 0 
+Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.ssl.dataChannelPolicy -Value 0
