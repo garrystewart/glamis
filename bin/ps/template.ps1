@@ -1,3 +1,10 @@
+# static ip and dns
+New-NetIPAddress –InterfaceAlias "Ethernet" –IPAddress "192.168.0.101" –PrefixLength 24 -DefaultGateway "192.168.0.1"
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 1.1.1.1, 1.0.0.1
+
+# rename computer
+Rename-Computer -NewName "server" -Restart
+
 # allow downloads from web
 add-type @"
 using System.Net;
