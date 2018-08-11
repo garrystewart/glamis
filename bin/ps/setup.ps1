@@ -17,3 +17,12 @@ Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.ssl.cont
 Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.ssl.dataChannelPolicy -Value 0
 Add-WebConfiguration "/system.ftpServer/security/authorization" -value @{accessType="Allow";users="Administrator";permissions="Read,Write"} -PSPath IIS:\ -location "Default Web Site"
 Restart-Service FTPSVC
+
+# give IUSR permissions to wwwroot
+$path = 'C:\inetpub\wwwroot'
+New-Item -Path $path -ItemType directory
+$acl = Get-Acl -Path $path
+$permission = 'IUSR', 'Modify', 'ContainerInherit, ObjectInherit', 'None', 'Allow'
+$rule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $permission
+$acl.SetAccessRule($rule)
+$acl | Set-Acl -Path $path
