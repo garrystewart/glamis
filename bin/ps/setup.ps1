@@ -16,3 +16,4 @@ Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.authenti
 Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.ssl.controlChannelPolicy -Value 0 
 Set-ItemProperty "IIS:\Sites\Default Web Site" -Name ftpServer.security.ssl.dataChannelPolicy -Value 0
 Add-WebConfiguration "/system.ftpServer/security/authorization" -value @{accessType="Allow";users="Administrator";permissions="Read,Write"} -PSPath IIS:\ -location "Default Web Site"
+Restart-Service FTPSVC

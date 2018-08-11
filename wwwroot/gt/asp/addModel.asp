@@ -10,7 +10,7 @@
             var cars = JSON.parse(openTextFile(path));
             for (var model in cars[form.make]) {
                 if (model.toLowerCase() === form.model.toLowerCase()) {
-                    if (makeFound && model.toLowerCase() === form.model.toLowerCase()) {
+                    if (model.toLowerCase() === form.model.toLowerCase()) {
                         httpResponse(400, 'model already added');
                     }
                 }
