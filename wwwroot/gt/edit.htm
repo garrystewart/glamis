@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Gran Turismo Sport</title>
+</head>
+
+<body>
+	<a href="list.htm">Back</a>
+	<label for "ipt-make">Make</label>
+	<input type="text" id="ipt-make">
+	<label for "ipt-model">Model</label>
+	<input type="text" id="ipt-model">
+	<button id="btn-edit">Edit car</button>
+	<script src="../js/jquery-3.3.1.min.js"></script>
+	<script src="../js/functions.js"></script>
+	<script>
+		var make = new URL(window.location).searchParams.get('make')
+		var model = new URL(window.location).searchParams.get('model')
+		$('#ipt-make').val(make);
+		$('#ipt-model').val(model);
+		$('#btn-edit').click(function () {
+			// validation
+			if (!$('#ipt-make').val()) {
+				alert('make not entered');
+				return;
+			}
+			if (!$('#ipt-model').val()) {
+				alert('model not entered');
+				return;
+			}
+			// end of validation
+			var car = {
+				'make': $('#ipt-make').val(),
+				'model': $('#ipt-model').val()
+			}
+			$.post('asp/edit.asp', {
+				data: JSON.stringify(car)
+			}, function () {
+				alert('car edited');
+			}).fail(function (jqxhr) {
+				ajaxFailAlert(jqxhr);
+			});
+		});
+	</script>
+</body>
+
+</html>

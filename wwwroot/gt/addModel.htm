@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Gran Turismo Sport</title>
+</head>
+
+<body>
+	<a href="index.htm">Back</a>
+	<label for "sel-make">Make</label>
+	<select id="sel-make">
+		<option>Please select</option>
+	</select>
+	<label for "ipt-model">Model</label>
+	<input type="text" id="ipt-model">
+	<button id="btn-add">Add model</button>
+	<script src="../js/jquery-3.3.1.min.js"></script>
+	<script src="../js/functions.js"></script>
+	<script>
+		$('#btn-add').click(function () {
+			// validation
+			if (!$('#ipt-model').val()) {
+				alert('model not entered');
+				return;
+			}
+			// end of validation
+			var data = {
+				'make': $('#sel-make').val(),
+				'model': $('#ipt-model').val()
+			}
+			$.post('asp/addModel.asp', {
+				data: JSON.stringify(data)
+			}, function () {
+				alert('model added');
+			}).fail(function (jqxhr) {
+				ajaxFailAlert(jqxhr);
+			});
+		});
+	</script>
+</body>
+
+</html>

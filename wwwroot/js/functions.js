@@ -1,4 +1,7 @@
 function ajaxFailAlert(jqxhr) {
-	console.log(jqxhr);
-	alert(jqxhr.status + ' ' + jqxhr.statusText);
+	try {
+		alert(JSON.parse(jqxhr.responseText).message);
+	} catch (error) {
+		alert(jqxhr.status + ' ' + jqxhr.statusText);
+	}
 }

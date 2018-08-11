@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Gran Turismo Sport</title>
+</head>
+
+<body>
+	<a href="index.htm">Back</a>
+	<label for "ipt-make">Make</label>
+	<input type="text" id="ipt-make">
+	<button id="btn-add">Add make</button>
+	<script src="../js/jquery-3.3.1.min.js"></script>
+	<script src="../js/functions.js"></script>
+	<script>
+		$('#btn-add').click(function () {
+			// validation
+			if (!$('#ipt-make').val()) {
+				alert('make not entered');
+				return;
+			}
+			// end of validation
+			var data = {
+				'make': $('#ipt-make').val()
+			}
+			$.post('asp/addMake.asp', {
+				data: JSON.stringify(data)
+			}, function () {
+				alert('make added');
+			}).fail(function (jqxhr) {
+				ajaxFailAlert(jqxhr);
+			});
+		});
+	</script>
+</body>
+
+</html>

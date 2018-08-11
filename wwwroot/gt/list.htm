@@ -21,22 +21,29 @@
 	<script>
 		$.getJSON('data/cars.json', function (cars) {
 			console.log(cars);
+			var modelFound = false;
 			for (var make in cars) {
-				for (model in cars[make]) {
-					var html = '';
-					html += '<tr>';
-					html += '<td>' + make + '</td>';
-					html += '<td>' + model + '</td>';
-					html += '<td><a href="#">Edit</a></td>';
-					html += '<td><a href="#">Remove</a></td>';
-					html += '</tr>';
-					$('tbody').append(html);
-					html = '';
+				if (Object.keys(cars[make]).length) {
+					modelFound = true;
+					for (model in cars[make]) {
+						var html = '';
+						html += '<tr>';
+						html += '<td>' + make + '</td>';
+						html += '<td>' + model + '</td>';
+						//html += '<td><a href="edit.htm?make=' + make + '&model=' + model + '">Edit</a></td>';
+						//html += '<td><a class="cmd-remove" href="#" data-make="' + make + '" data-model="' + model + '">Remove</a></td>';
+						html += '</tr>';
+						$('tbody').append(html);
+						html = '';
+					}
 				}
 			}
+			if (!modelFound){
+				alert('no models found');
+			}
 		}).fail(function (jqxhr) {
-			if (jqxhr.status === 404){
-				alert('no cars found');
+			if (jqxhr.status === 404) {
+				alert('no makes found');
 			} else {
 				ajaxFailAlert(jqxhr);
 			}
