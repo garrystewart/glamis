@@ -8,13 +8,20 @@
         var path = '/gt/data/cars.json';
         if (fileExists(path)) {
             var cars = JSON.parse(openTextFile(path));
+            var makeFound = false;
             for (var make in cars) {
-                if (make.toLowerCase() === form.make.toLowerCase() && Object.keys(cars[make]).toString().toLowerCase() ===
-                    form.model.toLowerCase()) {
-                    httpResponse(400, 'car already added');
+                if (make.toLowerCase() === form.make.toLowerCase()) {
+                    makeFound = true;
+                }
+                for (var model in cars[make]) {
+                    if (makeFound && model.toLowerCase() === form.model.toLowerCase()) {
+                        httpResponse(400, 'car already added');
+                    }
                 }
             }
-            cars[form.make] = {};
+            if (!makeFound) {
+                cars[form.make] = {};
+            }
             cars[form.make][form.model] = {};
             openTextFile(path, JSON.stringify(cars));
         } else {

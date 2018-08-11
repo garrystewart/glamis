@@ -1,14 +1,13 @@
 function createTextFile(path, text) {
     var fso = new ActiveXObject('Scripting.FileSystemObject');
     try {
-        fsoCreateTextFile();
-        return true;
+        return fsoCreateTextFile();
     } catch (error) {
         try {
             createFolderStructure(path);
-            fsoCreateTextFile();
+            return fsoCreateTextFile();
         } catch (error) {
-            Response.Write(JSON.stringify(error));
+            return error;
         }
     }
 
@@ -16,6 +15,7 @@ function createTextFile(path, text) {
         var file = fso.CreateTextFile(Server.MapPath(path), true);
         file.WriteLine(text);
         file.Close();
+        return true;
     }
 }
 
@@ -23,17 +23,17 @@ function openTextFile(path, text) {
     var fso = new ActiveXObject('Scripting.FileSystemObject');
     if (text) {
         try {
-            fsoOpenTextFile();
-            return true;
+            return fsoOpenTextFile();
         } catch (error) {
             createFolderStructure(path);
-            fsoOpenTextFile();
+            return fsoOpenTextFile();
         }
 
         function fsoOpenTextFile() {
             var file = fso.OpenTextFile(Server.MapPath(path), 2, true);
             file.WriteLine(text);
             file.Close();
+            return true;
         }
     } else {
         if (fileExists(path)) {
@@ -71,7 +71,7 @@ function createFolder(path) {
         fso.CreateFolder(Server.MapPath(path));
         return true;
     } catch (error) {
-        return false;
+        return error;
     }
 }
 
@@ -90,7 +90,7 @@ function createFolderStructure(path) {
         }
         return true;
     } catch (error) {
-        Response.Write(JSON.stringify(error));
+        return error;
     }
 }
 
