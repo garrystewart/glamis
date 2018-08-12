@@ -16,16 +16,16 @@
     <div class="container">
         <form>
             <div class="form-group">
-                <label for="ipt-country">Country</label>
-                <input type="text" class="form-control" id="ipt-country">
-            </div>
-            <div class="form-group">
                 <label for="ipt-manufacturer">Manufacturer</label>
                 <input type="text" class="form-control" id="ipt-manufacturer">
             </div>
             <div class="form-group">
                 <label for="ipt-model">Model</label>
                 <input type="text" class="form-control" id="ipt-model">
+            </div>
+            <div class="form-group">
+                <label for="ipt-country">Country</label>
+                <input type="text" class="form-control" id="ipt-country">
             </div>
             <div class="form-group">
                 <label for="ipt-year">Year</label>
@@ -132,11 +132,24 @@
     <script src="../js/external/popper.min.js"></script>
     <script src="../js/external/bootstrap.min.js"></script>
     <script>
-        $('#btn-add').click(function(){
+        $.getJSON('data/cars.json', function (cars) {
+            $('#ipt-manufacturer, #ipt-model').change(function(){
+                var manufacturer = $('#ipt-manufacturer').val();
+                var model = $('#ipt-model').val();
+                $(cars).each(function(index, item){
+                    if (manufacturer === item.manufacturer && model === item.model){
+                        alert('car already added');
+                        $('#btn-add').attr('disabled', 'disabled');
+                        return false;
+                    }
+                });
+            });
+        });
+        $('#btn-add').click(function () {
             var data = {
-                'country': $('#ipt-country').val(),
-                'manufacturer': $('#ipt-make').val(),
-                'model': $('#ipt-model').val(),
+                'manufacturer': $('#ipt-manufacturer').val().trim(),
+                'model': $('#ipt-model').val().trim(),
+                'country': $('#ipt-country').val().trim(),
                 'year': Number($('#ipt-year').val()),
                 'category': $('#sel-category').val(),
                 'cr': Number($('#ipt-cr').val()),
@@ -160,18 +173,20 @@
                 'cornering': Number($('#ipt-cornering').val()),
                 'stability': Number($('#ipt-stability').val())
             }
-            if (data.year === 0){
+            if (data.year === 0) {
                 delete data.year;
             }
-            if (data.cr === 0){
+            if (data.cr === 0) {
                 delete data.cr;
             }
-            if (data.displacement === 0){
+            if (data.displacement === 0) {
                 delete data.displacement;
             }
-            $.post('asp/addCar.asp', {data: JSON.stringify(data)}, function(){
+            $.post('asp/addCar.asp', {
+                data: JSON.stringify(data)
+            }, function () {
                 alert('added');
-            }).fail(function(){
+            }).fail(function () {
                 alert('fail');
             });
         });

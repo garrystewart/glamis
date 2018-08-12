@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../css/external/bootstrap.min.css">
+
+    <title>GT Sport</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Manufacturer</th>
+                    <th>Model</th>
+                    <th>Country</th>
+                    <th>Year</th>
+                    <th>Category</th>
+                    <th>Cr.</th>
+                    <th>Displacement</th>
+                    <th>Max. Power</th>
+                    <th>Max. Torque</th>
+                    <th>Drivetrain</th>
+                    <th>Length (mm)</th>
+                    <th>Width (mm)</th>
+                    <th>Height (mm)</th>
+                    <th>Weight (kgs)</th>
+                    <th>Max. Speed</th>
+                    <th>Acceleration</th>
+                    <th>Braking</th>
+                    <th>Cornering</th>
+                    <th>Stability</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="../js/external/jquery-3.3.1.min.js"></script>
+    <script src="../js/external/popper.min.js"></script>
+    <script src="../js/external/bootstrap.min.js"></script>
+    <script>
+        $.getJSON('data/cars.json', function (cars) {
+            function buildTd(td) {
+                var html = '';
+                if (td) {
+                    html += '<td>' + td + '</td>'
+                } else {
+                    html += '<td></td>'
+                }
+                return html;
+            }
+            $(cars).each(function (index, item) {
+                var html = '';
+                html += '<tr>';
+                html += '<td>' + item.manufacturer + '</td>';
+                html += '<td>' + item.model + '</td>';
+                html += '<td>' + item.country + '</td>';
+                html += buildTd(item.year);
+                html += '<td>' + item.category + '</td>';
+                html += buildTd(item.cr);
+                html += buildTd(item.displacement);
+                html += '<td>' + item.maxPower.bhp + ' BHP @ ' + item.maxPower.rpm + ' rpm</td>';
+                html += '<td>' + item.maxTorque.kgfm + ' kgfm @ ' + item.maxTorque.rpm + ' rpm</td>';
+                html += '<td>' + item.drivetrain + '</td>';
+                html += '<td>' + item.length + '</td>';
+                html += '<td>' + item.width + '</td>';
+                html += '<td>' + item.height + '</td>';
+                html += '<td>' + item.weight + '</td>';
+                html += '<td>' + item.maxSpeed + '</td>';
+                html += '<td>' + item.acceleration + '</td>';
+                html += '<td>' + item.braking + '</td>';
+                html += '<td>' + item.cornering + '</td>';
+                html += '<td>' + item.stability + '</td>';
+                html += '</tr>';
+                $('tbody').append(html);
+                html = '';
+            });
+        });
+    </script>
+</body>
+
+</html>
