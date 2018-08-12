@@ -2,15 +2,87 @@
 <html lang="en">
 
 <head>
-  <title>Gran Turismo Sport</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../css/external/bootstrap.min.css">
+
+    <title>GT Sport</title>
 </head>
 
 <body>
-<a href="addMake.htm">Add make</a>
-<a href="addModel.htm">Add model</a>
-<a href="addStats.htm">Add stats</a>
-<a href="listMakes.htm">List makes</a>
-<a href="listModels.htm">List models</a>
+    <div class="container">
+        <form>
+            <div class="form-group">
+                <label for="sel-group">Group</label>
+                <select multiple class="form-control" id="sel-group">
+<option>N100</option>
+<option>N200</option>
+<option>N300</option>
+<option>N400</option>
+<option>N500</option>
+<option>N600</option>
+<option>N700</option>
+<option>N800</option>
+<option>N900</option>
+<option>N1000</option>
+<option>Group 4</option>
+<option>Group 3</option>
+<option>Group 1</option>
+<option>Group B</option>
+<option>Group X</option>
+                </select>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="sel-hp">HP</label>
+                        <select class="form-control" id="sel-hp">
+                            <option>equal to</option>
+                            <option>greather than or equal to</option>
+                            <option>less than or equal to</option>
+                            <option>greater than</option>
+                            <option>less than</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="ipt-hp">HP</label>
+                        <input type="number" class="form-control" id="ipt-hp">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="sel-weight">Weight</label>
+                        <select class="form-control" id="sel-weight">
+                            <option>equal to</option>
+                            <option>greather than or equal to</option>
+                            <option>less than or equal to</option>
+                            <option>greater than</option>
+                            <option>less than</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="ipt-weight">Weight</label>
+                        <input type="number" class="form-control" id="ipt-weight">
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="../js/external/jquery-3.3.1.min.js"></script>
+    <script src="../js/external/popper.min.js"></script>
+    <script src="../js/external/bootstrap.min.js"></script>
 </body>
 
 </html>
