@@ -20,7 +20,6 @@ Restart-Service FTPSVC
 
 # give IUSR permissions to wwwroot
 $path = 'C:\inetpub\wwwroot'
-New-Item -Path $path -ItemType directory
 $acl = Get-Acl -Path $path
 $permission = 'IUSR', 'Modify', 'ContainerInherit, ObjectInherit', 'None', 'Allow'
 $rule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $permission

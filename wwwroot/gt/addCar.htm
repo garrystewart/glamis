@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../css/external/bootstrap.min.css">
+
+    <title>GT Sport</title>
+</head>
+
+<body>
+    <div class="container">
+        <form>
+            <div class="form-group">
+                <label for="ipt-country">Country</label>
+                <input type="text" class="form-control" id="ipt-country">
+            </div>
+            <div class="form-group">
+                <label for="ipt-manufacturer">Manufacturer</label>
+                <input type="text" class="form-control" id="ipt-manufacturer">
+            </div>
+            <div class="form-group">
+                <label for="ipt-model">Model</label>
+                <input type="text" class="form-control" id="ipt-model">
+            </div>
+            <div class="form-group">
+                <label for="ipt-year">Year</label>
+                <input type="number" class="form-control" id="ipt-year">
+            </div>
+            <div class="form-group">
+                <label for="sel-category">Category</label>
+                <select class="form-control" id="sel-category">
+                    <option>Please select</option>
+                    <option value="N100">N100</option>
+                    <option value="N200">N200</option>
+                    <option value="N300">N300</option>
+                    <option value="N400">N400</option>
+                    <option value="N500">N500</option>
+                    <option value="N600">N600</option>
+                    <option value="N700">N700</option>
+                    <option value="N800">N800</option>
+                    <option value="N900">N900</option>
+                    <option value="N1000">N1000</option>
+                    <option value="Gr.4">Gr.4</option>
+                    <option value="Gr.3">Gr.3</option>
+                    <option value="Gr.1">Gr.1</option>
+                    <option value="Gr.B">Gr.B</option>
+                    <option value="Gr.X">Gr.X</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ipt-cr">Cr.</label>
+                <input type="number" class="form-control" id="ipt-cr">
+            </div>
+            <div class="form-group">
+                <label for="ipt-displacement">Displacement</label>
+                <input type="number" class="form-control" id="ipt-displacement">
+            </div>
+            <div class="form-group">
+                <label for="ipt-maxPowerBhp">Max. Power (BHP)</label>
+                <input type="number" class="form-control" id="ipt-maxPowerBhp">
+            </div>
+            <div class="form-group">
+                <label for="ipt-maxPowerRpm">Max. Power (rpm)</label>
+                <input type="number" class="form-control" id="ipt-maxPowerRpm">
+            </div>
+            <div class="form-group">
+                <label for="ipt-maxTorqueKgfm">Max. Torque (kgfm)</label>
+                <input type="number" class="form-control" id="ipt-maxTorqueKgfm">
+            </div>
+            <div class="form-group">
+                <label for="ipt-maxTorqueRpm">Max. Torque (rpm)</label>
+                <input type="number" class="form-control" id="ipt-maxTorqueRpm">
+            </div>
+            <div class="form-group">
+                <label for="sel-drivetrain">Drivetrain</label>
+                <select class="form-control" id="sel-drivetrain">
+                    <option>Please select</option>
+                    <option value="FF">FF</option>
+                    <option value="RR">RR</option>
+                    <option value="FR">FR</option>
+                    <option value="4WD">4WD</option>
+                    <option value="MR">MR</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ipt-length">Length</label>
+                <input type="number" class="form-control" id="ipt-length">
+            </div>
+            <div class="form-group">
+                <label for="ipt-width">Width</label>
+                <input type="number" class="form-control" id="ipt-width">
+            </div>
+            <div class="form-group">
+                <label for="ipt-height">Height</label>
+                <input type="number" class="form-control" id="ipt-height">
+            </div>
+            <div class="form-group">
+                <label for="ipt-weight">Weight</label>
+                <input type="number" class="form-control" id="ipt-weight">
+            </div>
+            <div class="form-group">
+                <label for="ipt-maxSpeed">Max. Speed</label>
+                <input type="number" class="form-control" id="ipt-maxSpeed">
+            </div>
+            <div class="form-group">
+                <label for="ipt-acceleration">Acceleration</label>
+                <input type="number" class="form-control" id="ipt-acceleration">
+            </div>
+            <div class="form-group">
+                <label for="ipt-braking">Braking</label>
+                <input type="number" class="form-control" id="ipt-braking">
+            </div>
+            <div class="form-group">
+                <label for="ipt-cornering">Cornering</label>
+                <input type="number" class="form-control" id="ipt-cornering">
+            </div>
+            <div class="form-group">
+                <label for="ipt-stability">Stability</label>
+                <input type="number" class="form-control" id="ipt-stability">
+            </div>
+            <button type="button" class="btn btn-primary" id="btn-add">Add</button>
+        </form>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="../js/external/jquery-3.3.1.min.js"></script>
+    <script src="../js/external/popper.min.js"></script>
+    <script src="../js/external/bootstrap.min.js"></script>
+    <script>
+        $('#btn-add').click(function(){
+            var data = {
+                'country': $('#ipt-country').val(),
+                'manufacturer': $('#ipt-make').val(),
+                'model': $('#ipt-model').val(),
+                'year': Number($('#ipt-year').val()),
+                'category': $('#sel-category').val(),
+                'cr': Number($('#ipt-cr').val()),
+                'displacement': Number($('#ipt-displacement').val()),
+                'maxPower': {
+                    'bhp': Number($('#ipt-maxPowerBhp').val()),
+                    'rpm': Number($('#ipt-maxPowerRpm').val())
+                },
+                'maxTorque': {
+                    'kgfm': Number($('#ipt-maxTorqueKgfm').val()),
+                    'rpm': Number($('#ipt-maxTorqueRpm').val())
+                },
+                'drivetrain': $('#sel-drivetrain').val(),
+                'length': Number($('#ipt-length').val()),
+                'width': Number($('#ipt-width').val()),
+                'height': Number($('#ipt-height').val()),
+                'weight': Number($('#ipt-weight').val()),
+                'maxSpeed': Number($('#ipt-maxSpeed').val()),
+                'acceleration': Number($('#ipt-acceleration').val()),
+                'braking': Number($('#ipt-braking').val()),
+                'cornering': Number($('#ipt-cornering').val()),
+                'stability': Number($('#ipt-stability').val())
+            }
+            if (data.year === 0){
+                delete data.year;
+            }
+            if (data.cr === 0){
+                delete data.cr;
+            }
+            if (data.displacement === 0){
+                delete data.displacement;
+            }
+            $.post('asp/addCar.asp', {data: JSON.stringify(data)}, function(){
+                alert('added');
+            }).fail(function(){
+                alert('fail');
+            });
+        });
+    </script>
+</body>
+
+</html>
