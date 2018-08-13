@@ -133,11 +133,11 @@
     <script src="../js/external/bootstrap.min.js"></script>
     <script>
         $.getJSON('data/cars.json', function (cars) {
-            $('#ipt-manufacturer, #ipt-model').change(function(){
+            $('#ipt-manufacturer, #ipt-model').change(function () {
                 var manufacturer = $('#ipt-manufacturer').val();
                 var model = $('#ipt-model').val();
-                $(cars).each(function(index, item){
-                    if (manufacturer === item.manufacturer && model === item.model){
+                $(cars).each(function (index, item) {
+                    if (manufacturer === item.manufacturer && model === item.model) {
                         alert('car already added');
                         $('#btn-add').attr('disabled', 'disabled');
                         return false;
@@ -151,36 +151,48 @@
                 'model': $('#ipt-model').val().trim(),
                 'country': $('#ipt-country').val().trim(),
                 'year': Number($('#ipt-year').val()),
-                'category': $('#sel-category').val(),
-                'cr': Number($('#ipt-cr').val()),
-                'displacement': Number($('#ipt-displacement').val()),
-                'maxPower': {
-                    'bhp': Number($('#ipt-maxPowerBhp').val()),
-                    'rpm': Number($('#ipt-maxPowerRpm').val())
+                'components': {
+                    'engine': {
+                        'displacement': Number($('#ipt-displacement').val()),
+                        'power': {
+                            'bhp': Number($('#ipt-maxPowerBhp').val()),
+                            'rpm': Number($('#ipt-maxPowerRpm').val())
+                        },
+                        'torque': {
+                            'kgfm': Number($('#ipt-maxTorqueKgfm').val()),
+                            'rpm': Number($('#ipt-maxTorqueRpm').val())
+                        }
+                    },
+                    'drivetrain': $('#sel-drivetrain').val()
                 },
-                'maxTorque': {
-                    'kgfm': Number($('#ipt-maxTorqueKgfm').val()),
-                    'rpm': Number($('#ipt-maxTorqueRpm').val())
+                'measurements': {
+                    'dimensions': {
+                        'length': Number($('#ipt-length').val()),
+                        'width': Number($('#ipt-width').val()),
+                        'height': Number($('#ipt-height').val())
+                    },
+                    'weight': Number($('#ipt-weight').val())
                 },
-                'drivetrain': $('#sel-drivetrain').val(),
-                'length': Number($('#ipt-length').val()),
-                'width': Number($('#ipt-width').val()),
-                'height': Number($('#ipt-height').val()),
-                'weight': Number($('#ipt-weight').val()),
-                'maxSpeed': Number($('#ipt-maxSpeed').val()),
-                'acceleration': Number($('#ipt-acceleration').val()),
-                'braking': Number($('#ipt-braking').val()),
-                'cornering': Number($('#ipt-cornering').val()),
-                'stability': Number($('#ipt-stability').val())
+                'gt': {
+                    'category': $('#sel-category').val(),
+                    'cr': Number($('#ipt-cr').val()),
+                    'stats': {
+                        'maxSpeed': Number($('#ipt-maxSpeed').val()),
+                        'acceleration': Number($('#ipt-acceleration').val()),
+                        'braking': Number($('#ipt-braking').val()),
+                        'cornering': Number($('#ipt-cornering').val()),
+                        'stability': Number($('#ipt-stability').val())
+                    }
+                }
             }
             if (data.year === 0) {
                 delete data.year;
             }
-            if (data.cr === 0) {
-                delete data.cr;
+            if (data.gt.cr === 0) {
+                delete data.gt.cr;
             }
-            if (data.displacement === 0) {
-                delete data.displacement;
+            if (data.components.engine.displacement === 0) {
+                delete data.components.engine.displacement;
             }
             $.post('asp/addCar.asp', {
                 data: JSON.stringify(data)
