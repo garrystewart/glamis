@@ -24,18 +24,28 @@
                 </tr>
                 <tr>
                     <th class="text-center" colspan="3">Engine</th>
-                    <th rowspan="2">Drivetrain</th>
+                    <th rowspan="2">Drivetrain
+                        <select class="form-control" id="sel-drivetrain" multiple></select>
+                    </th>
                     <th class="text-center" colspan="3">Dimensions</th>
                     <th rowspan="2">Weight (kgs)</th>
-                    <th rowspan="2">Category</th>
+                    <th rowspan="2">Category
+                        <select class="form-control" id="sel-category" multiple></select>
+                    </th>
                     <th rowspan="2">Cr.</th>
                     <th class="text-center" colspan="5">Stats</th>
                 </tr>
                 <tr>
-                    <th>Manufacturer</th>
+                    <th>Manufacturer
+                        <select class="form-control" id="sel-manufacturer" multiple></select>
+                    </th>
                     <th>Model</th>
-                    <th>Year</th>
-                    <th>Country</th>
+                    <th>Year
+                        <select class="form-control" id="sel-year" multiple></select>
+                    </th>
+                    <th>Country
+                        <select class="form-control" id="sel-country" multiple></select>
+                    </th>
 
                     <th>Displacement</th>
                     <th>Max. Power</th>
@@ -62,37 +72,54 @@
     <script src="../js/external/bootstrap.min.js"></script>
     <script>
         $.getJSON('data/cars.json', function (cars) {
-            function buildTd(td) {
+            function buildTd(td, cls) {
                 var html = '';
                 if (td) {
-                    html += '<td>' + td + '</td>'
+                    if (cls) {
+                        html += '<td class="' + cls + '">' + td + '</td>'
+                    } else {
+                        html += '<td>' + td + '</td>'
+                    }
                 } else {
                     html += '<td></td>'
                 }
                 return html;
             }
+
+            function addToSelect(id, option) {
+                if (option) {
+                    if (!$('#sel-' + id + ' option[value="' + option + '"]').length) {
+                        $('#sel-' + id).append('<option value="' + option + '">' + option + '</option>')
+                    }
+                }
+            }
             $(cars).each(function (index, item) {
                 console.log(item);
                 var html = '';
                 html += '<tr>';
-                html += '<td>' + item.manufacturer + '</td>';
+                html += '<td class="manufacturer">' + item.manufacturer + '</td>';
+                addToSelect('manufacturer', item.manufacturer);
                 html += '<td>' + item.model + '</td>';
-                html += buildTd(item.year);
-                html += '<td>' + item.country + '</td>';
+                html += buildTd(item.year, 'year');
+                addToSelect('year', item.year);
+                html += '<td class="country">' + item.country + '</td>';
+                addToSelect('country', item.country);
 
                 html += buildTd(item.components.engine.displacement);
                 html += '<td>' + item.components.engine.power.bhp + ' BHP @ ' + item.components.engine.power
                     .rpm + ' rpm</td>';
                 html += '<td>' + item.components.engine.torque.kgfm + ' kgfm @ ' + item.components.engine
                     .torque.rpm + ' rpm</td>';
-                html += '<td>' + item.components.drivetrain + '</td>';
+                html += '<td class="drivetrain">' + item.components.drivetrain + '</td>';
+                addToSelect('drivetrain', item.components.drivetrain);
 
                 html += '<td>' + item.measurements.dimensions.length + '</td>';
                 html += '<td>' + item.measurements.dimensions.width + '</td>';
                 html += '<td>' + item.measurements.dimensions.height + '</td>';
                 html += '<td>' + item.measurements.weight + '</td>';
 
-                html += '<td>' + item.gt.category + '</td>';
+                html += '<td class="category">' + item.gt.category + '</td>';
+                addToSelect('category', item.gt.category);
                 html += buildTd(item.gt.cr);
                 html += '<td>' + item.gt.stats.maxSpeed + '</td>';
                 html += '<td>' + item.gt.stats.acceleration + '</td>';
@@ -103,6 +130,39 @@
                 $('tbody').append(html);
                 html = '';
             });
+            $('select').change(function () {
+                var id = $(this).attr('id');
+                var col = id.substring(id.indexOf('sel-') + 4);
+                var selection = $(this).val();
+                if (selection.length) {
+                    $(this).data('filter', true);
+                    $('.' + col).each(function (index, item) {
+                        if (~selection.indexOf($(item).text())) {
+                            $(item).parent().show();
+                        } else {
+                            $(item).parent().hide();
+                        }
+                    });
+                } else {
+                    $(this).data('filter', false);
+                    $('.' + col).each(function (index, item) {
+                        $(item).parent().show();
+                    });
+                }
+                rebuildFilters();
+            });
+            function rebuildFilters(){
+                $('select').each(function(index, item){
+                    var id = $(item).attr('id');
+                    var col = id.substring(id.indexOf('sel-') + 4);
+                    if (!$(item).data('filter')){
+                        $(item).children().remove();
+                        $('.' + col + ':visible').each(function(index, item){
+                            addToSelect(col, $(item).text());
+                        });
+                    }
+                });
+            }
         });
     </script>
 </body>
