@@ -70,6 +70,8 @@
     <script src="../js/external/jquery-3.3.1.min.js"></script>
     <script src="../js/external/popper.min.js"></script>
     <script src="../js/external/bootstrap.min.js"></script>
+    <script src="../js/external/solid.min.js"></script>
+    <script src="../js/external/fontawesome.min.js"></script>
     <script>
         $.getJSON('data/cars.json', function (cars) {
             function buildTd(td, cls) {
@@ -126,12 +128,46 @@
                 html += '<td>' + item.gt.stats.braking + '</td>';
                 html += '<td>' + item.gt.stats.cornering + '</td>';
                 html += '<td>' + item.gt.stats.stability + '</td>';
+
                 html += '</tr>';
                 $('tbody').append(html);
                 html = '';
             });
             $('select').change(function () {
-                var id = $(this).attr('id');
+                // set filter flag
+                var selection = $(this).val();
+                if (selection.length) {
+                    $(this).data('filter', true);
+                } else {
+                    $(this).data('filter', false);
+                }
+                // go look at all filters and make a note of which ones have selections made
+                var selectsInUse = [];
+                $('select').each(function (index, select) {
+                    if ($(select).val().length) {
+                        selectsInUse.push($(select));
+                    }
+                });
+                // now go through every row to see if all filters apply
+                $('tbody tr').each(function (index, row) {
+                    var conditionsMet = true;
+                    $(selectsInUse).each(function (index, select) {
+                        var id = $(select).attr('id');
+                        var col = id.substring(id.indexOf('sel-') + 4);
+                        var selection = $(select).val();
+                        if (!~selection.indexOf($(row).find('.' + col).text())) {
+                            conditionsMet = false;
+                            return false;
+                        }
+                    });
+                    if (!conditionsMet) {
+                        $(row).hide();
+                    } else {
+                        $(row).show();
+                    }
+                });
+                //rebuildFilters();
+                /*var id = $(this).attr('id');
                 var col = id.substring(id.indexOf('sel-') + 4);
                 var selection = $(this).val();
                 if (selection.length) {
@@ -149,15 +185,29 @@
                         $(item).parent().show();
                     });
                 }
-                rebuildFilters();
+                rebuildFilters();*/
             });
-            function rebuildFilters(){
-                $('select').each(function(index, item){
+
+            function selectFilters() {
+                $('select').each(function (index, select) {
+                    var id = $(select).attr('id');
+                    var col = id.substring(id.indexOf('sel-') + 4);
+                    if (!$(select).data('filter')) {
+                        $(select).children().remove();
+                        $('.' + col + ':visible').each(function (index, item) {
+                            addToSelect(col, $(item).text());
+                        });
+                    }
+                });
+            }
+
+            function rebuildFilters() {
+                $('select').each(function (index, item) {
                     var id = $(item).attr('id');
                     var col = id.substring(id.indexOf('sel-') + 4);
-                    if (!$(item).data('filter')){
+                    if (!$(item).data('filter')) {
                         $(item).children().remove();
-                        $('.' + col + ':visible').each(function(index, item){
+                        $('.' + col + ':visible').each(function (index, item) {
                             addToSelect(col, $(item).text());
                         });
                     }
