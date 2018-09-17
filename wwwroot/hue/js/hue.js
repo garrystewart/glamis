@@ -13,7 +13,7 @@ $.get('http://' + ip + '/api/' + username, function (data) {
         html += '<td class="name">' + data.lights[light].name + '</td>';
         html += '<td>' + data.lights[light].type + '</td>';
         html += '<td>' + data.lights[light].uniqueid + '</td>';
-        html += '<td class="on">' + data.lights[light].state.on + '</td>';
+        html += '<td><button type="button" class="btn btn-primary on">' + data.lights[light].state.on + '</button></td>';
         html += '<td><input type="range" name="bri" min="1" max="254" value="' + data.lights[light].state.bri + '"><span class="bri">' + data.lights[light].state.bri + '</span></td>';
         if (data.lights[light].state.hue) {
             html += '<td><input type="range" name="hue" min="0" max="65535" value="' + data.lights[light].state.hue + '"><span class="hue">' + data.lights[light].state.hue + '</span></td>';
@@ -24,10 +24,22 @@ $.get('http://' + ip + '/api/' + username, function (data) {
             html += '<td><input type="range" name="sat" min="0" max="254" value="' + data.lights[light].state.sat + '"><span class="sat">' + data.lights[light].state.sat + '</span></td>';
         } else {
             html += '<td></td>';
-        }        
-        html += '<td class="effect">' + data.lights[light].state.effect + '</td>';
-        html += '<td class="xy">' + data.lights[light].state.xy + '</td>';
-        html += '<td class="ct">' + data.lights[light].state.ct + '</td>';
+        }      
+        if (data.lights[light].state.effect) {
+            html += '<td><button type="button" class="btn btn-primary effect">' + data.lights[light].state.effect + '</button></td>';
+        } else {
+            html += '<td></td>';
+        }  
+        if (data.lights[light].state.cy) {
+            html += '<td class="xy">' + data.lights[light].state.xy + '</td>';
+        } else {
+            html += '<td></td>';
+        }
+        if (data.lights[light].state.ct) {
+            html += '<td class="ct">' + data.lights[light].state.ct + '</td>';
+        } else {
+            html += '<td></td>';
+        }
         html += '<td class="alert">' + data.lights[light].state.alert + '</td>';
         html += '<td>' + data.lights[light].state.colormode + '</td>';
         html += '<td>' + data.lights[light].state.mode + '</td>';
@@ -82,11 +94,8 @@ $('tbody').on('click', '.on', function () {
         on = true;
     } else if ($(this).text() === 'true') {
         on = false;
-    } else {
-        alert('invalid');
-        return false;
     }
-    var light = $(this).siblings('.light').text();
+    var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
         url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
@@ -266,6 +275,34 @@ $('tbody').on('click', '.sat', function () {
     });
 });
 
+$('tbody').on('click', '.effect', function () {
+    var effect;
+    if ($(this).text() === 'none') {
+        effect = 'colorloop';
+    } else if ($(this).text() === 'colorloop'){
+        effect = 'none';
+    }
+    var light = $(this).parent().siblings('.light').text();
+    var thisItem = this;
+    $.ajax({
+        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        method: 'put',
+        data: JSON.stringify({
+            "effect": effect
+        }),
+        success: function (data) {
+            if (data[0].success) {
+                $(thisItem).text(data[0].success['/lights/' + light + '/state/effect']);
+            } else {
+                alert(data[0].error.description);
+            }
+        },
+        error: function () {
+            alert('error');
+        }
+    });
+});
+
 $('tbody').on('click', '.alert', function () {
     var alert = prompt('alert', $(this).text());
     var light = $(this).siblings('.light').text();
@@ -279,29 +316,6 @@ $('tbody').on('click', '.alert', function () {
         success: function (data) {
             if (data[0].success) {
                 $(thisItem).text(data[0].success['/lights/' + light + '/state/alert']);
-            } else {
-                alert(data[0].error.description);
-            }
-        },
-        error: function () {
-            alert('error');
-        }
-    });
-});
-
-$('tbody').on('click', '.effect', function () {
-    var effect = prompt('effect', $(this).text());
-    var light = $(this).siblings('.light').text();
-    var thisItem = this;
-    $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
-        method: 'put',
-        data: JSON.stringify({
-            "effect": effect
-        }),
-        success: function (data) {
-            if (data[0].success) {
-                $(thisItem).text(data[0].success['/lights/' + light + '/state/effect']);
             } else {
                 alert(data[0].error.description);
             }
