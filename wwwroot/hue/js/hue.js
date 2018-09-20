@@ -29,34 +29,34 @@ $.get('http://' + ip + '/api/' + username, function (data) {
     var html = '';
     for (var light in data.lights) {
         html += '<tr>';
-        html += '<td class="light">' + light + '</td>';
-        html += '<td>' + data.lights[light].manufacturername + '</td>';
-        html += '<td>' + data.lights[light].productname + '</td>';
-        html += '<td class="modelid">' + data.lights[light].modelid + '<img src="img/Product icons/Products outline/SVG/' + knownModels[data.lights[light].modelid].icon + '.svg"></td>';
-        html += '<td class="name">' + data.lights[light].name + '</td>';
-        html += '<td>' + data.lights[light].type + '</td>';
-        html += '<td>' + data.lights[light].uniqueid + '</td>';
-        html += '<td><button type="button" class="btn btn-primary on">' + data.lights[light].state.on + '</button></td>';
-        html += '<td><input type="range" name="bri" min="0" max="254" value="' + data.lights[light].state.bri + '"><span class="bri">' + data.lights[light].state.bri + '</span></td>';
+        html += tdWrap(light, 'light');
+        html += tdWrap(data.lights[light].manufacturername);
+        html += tdWrap(data.lights[light].productname);
+        html += tdWrap(data.lights[light].modelid + '<img src="img/Product icons/Products outline/SVG/' + knownModels[data.lights[light].modelid].icon + '.svg">', 'modelid');
+        html += tdWrap(data.lights[light].name, 'name');
+        html += tdWrap(data.lights[light].type);
+        html += tdWrap(data.lights[light].uniqueid);
+        html += tdWrap('<button type="button" class="btn btn-primary on">' + data.lights[light].state.on + '</button>');
+        html += tdWrap('<input type="range" name="bri" min="0" max="254" value="' + data.lights[light].state.bri + '"><span class="bri">' + data.lights[light].state.bri + '</span>');
         if (typeof data.lights[light].state.hue !== 'undefined') {
-            html += '<td><input type="range" name="hue" min="0" max="65535" value="' + data.lights[light].state.hue + '"><span class="hue">' + data.lights[light].state.hue + '</span></td>';
+            html += tdWrap('<input type="range" name="hue" min="0" max="65535" value="' + data.lights[light].state.hue + '"><span class="hue">' + data.lights[light].state.hue + '</span>');
         } else {
-            html += '<td></td>';
+            html += tdWrap();
         }
         if (typeof data.lights[light].state.sat !== 'undefined') {
-            html += '<td><input type="range" name="sat" min="0" max="254" value="' + data.lights[light].state.sat + '"><span class="sat">' + data.lights[light].state.sat + '</span></td>';
+            html += tdWrap('<input type="range" name="sat" min="0" max="254" value="' + data.lights[light].state.sat + '"><span class="sat">' + data.lights[light].state.sat + '</span>');
         } else {
-            html += '<td></td>';
+            html += tdWrap();
         }
         if (typeof data.lights[light].state.effect !== 'undefined') {
-            html += '<td><button type="button" class="btn btn-primary effect">' + data.lights[light].state.effect + '</button></td>';
+            html += tdWrap('<button type="button" class="btn btn-primary effect">' + data.lights[light].state.effect + '</button>');
         } else {
-            html += '<td></td>';
+            html += tdWrap();
         }
         if (typeof data.lights[light].state.cy !== 'undefined') {
-            html += '<td class="xy">' + data.lights[light].state.xy + '</td>';
+            html += tdWrap(data.lights[light].state.xy, 'xy');
         } else {
-            html += '<td></td>';
+            html += tdWrap();
         }
         if (typeof data.lights[light].state.ct !== 'undefined') {
             var min = 153;
@@ -65,9 +65,9 @@ $.get('http://' + ip + '/api/' + username, function (data) {
                 min = knownModels[data.lights[light].modelid].ct.min;
                 max = knownModels[data.lights[light].modelid].ct.max;
             }
-            html += '<td><input type="range" name="ct" min="' + min + '" max="' + max + '" value="' + data.lights[light].state.ct + '"><span class="ct">' + data.lights[light].state.ct + '</span></td>';
+            html += tdWrap('<input type="range" name="ct" min="' + min + '" max="' + max + '" value="' + data.lights[light].state.ct + '"><span class="ct">' + data.lights[light].state.ct + '</span>');
         } else {
-            html += '<td></td>';
+            html += tdWrap();
         }
         html += '<td>';
         html += '<select class="alert form-control">';
@@ -89,20 +89,25 @@ $.get('http://' + ip + '/api/' + username, function (data) {
         html += '</select>';
         html += '</td>';
         if (typeof data.lights[light].state.colormode !== 'undefined') {
-            html += '<td>' + data.lights[light].state.colormode + '</td>';
+            html += tdWrap(data.lights[light].state.colormode);
         } else {
-            html += '<td></td>';
+            html += tdWrap();
         }
-        html += '<td>' + data.lights[light].state.mode + '</td>';
-        html += '<td>' + data.lights[light].state.reachable + '</td>';
-        html += '<td>' + data.lights[light].swupdate.state + '</td>';
-        html += '<td>' + data.lights[light].swupdate.lastinstall + '</td>';
-        html += '<td>' + data.lights[light].swversion + '</td>';
-        html += '<td>' + data.lights[light].config.archetype + '</td>';
-        html += '<td>' + data.lights[light].config.function+'</td>';
-        html += '<td>' + data.lights[light].config.direction + '</td>';
-        html += '<td>' + data.lights[light].capabilities.certified + '</td>';
+        html += tdWrap(data.lights[light].state.mode);
+        html += tdWrap(data.lights[light].state.reachable);
+        html += tdWrap(data.lights[light].swupdate.state);
+        html += tdWrap(data.lights[light].swupdate.lastinstall);
+        html += tdWrap(data.lights[light].swversion);
+        html += tdWrap(data.lights[light].config.archetype);
+        html += tdWrap(data.lights[light].config.function);
+        html += tdWrap(data.lights[light].config.direction);
+        html += tdWrap(data.lights[light].capabilities.certified);
         html += '</tr>';
+        /*setInterval(function (light) {
+            $.get('http://' + ip + '/api/' + username + '/lights/' + light, function (data) {
+                console.log(data);
+            }(light));
+        }, 10000);*/
     }
     $('#tblLights tbody').append(html);
     html = '';
