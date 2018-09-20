@@ -1,55 +1,107 @@
 var username = 'DcpBX2e6CNpKvNmVNNAnpx2weGbyxiDa8ul49NKG';
 var ip = '192.168.0.12';
 
+var knownModels = {
+    "LCT015": {
+        "icon": "e27_waca",
+        "ct": {
+            "min": 153,
+            "max": 500
+        }
+    },
+    "LWB010": {
+        "icon": "e27_white"
+    },
+    "RS 125": {
+        "icon": "gu10"
+    },
+    "RS 128 T": {
+        "icon": "gu10",
+        "ct": {
+            "min": 200,
+            "max": 454
+        }
+    }
+};
+
 $.get('http://' + ip + '/api/' + username, function (data) {
     console.log(data);
     var html = '';
     for (var light in data.lights) {
         html += '<tr>';
         html += '<td class="light">' + light + '</td>';
-        html += '<td class="name">' + data.lights[light].manufacturername + '</td>';
-        html += '<td class="name">' + data.lights[light].productname + '</td>';
-        html += '<td class="name">' + data.lights[light].modelid + '<img src="img/Product icons/Products outline/SVG/' + icons[data.lights[light].modelid] + '.svg"></td>';
+        html += '<td>' + data.lights[light].manufacturername + '</td>';
+        html += '<td>' + data.lights[light].productname + '</td>';
+        html += '<td class="modelid">' + data.lights[light].modelid + '<img src="img/Product icons/Products outline/SVG/' + knownModels[data.lights[light].modelid].icon + '.svg"></td>';
         html += '<td class="name">' + data.lights[light].name + '</td>';
         html += '<td>' + data.lights[light].type + '</td>';
         html += '<td>' + data.lights[light].uniqueid + '</td>';
         html += '<td><button type="button" class="btn btn-primary on">' + data.lights[light].state.on + '</button></td>';
-        html += '<td><input type="range" name="bri" min="1" max="254" value="' + data.lights[light].state.bri + '"><span class="bri">' + data.lights[light].state.bri + '</span></td>';
-        if (data.lights[light].state.hue) {
+        html += '<td><input type="range" name="bri" min="0" max="254" value="' + data.lights[light].state.bri + '"><span class="bri">' + data.lights[light].state.bri + '</span></td>';
+        if (typeof data.lights[light].state.hue !== 'undefined') {
             html += '<td><input type="range" name="hue" min="0" max="65535" value="' + data.lights[light].state.hue + '"><span class="hue">' + data.lights[light].state.hue + '</span></td>';
         } else {
             html += '<td></td>';
         }
-        if (data.lights[light].state.sat) {
+        if (typeof data.lights[light].state.sat !== 'undefined') {
             html += '<td><input type="range" name="sat" min="0" max="254" value="' + data.lights[light].state.sat + '"><span class="sat">' + data.lights[light].state.sat + '</span></td>';
         } else {
             html += '<td></td>';
-        }      
-        if (data.lights[light].state.effect) {
+        }
+        if (typeof data.lights[light].state.effect !== 'undefined') {
             html += '<td><button type="button" class="btn btn-primary effect">' + data.lights[light].state.effect + '</button></td>';
         } else {
             html += '<td></td>';
-        }  
-        if (data.lights[light].state.cy) {
+        }
+        if (typeof data.lights[light].state.cy !== 'undefined') {
             html += '<td class="xy">' + data.lights[light].state.xy + '</td>';
         } else {
             html += '<td></td>';
         }
-        if (data.lights[light].state.ct) {
-            html += '<td class="ct">' + data.lights[light].state.ct + '</td>';
+        if (typeof data.lights[light].state.ct !== 'undefined') {
+            var min = 153;
+            var max = 500;
+            if (typeof knownModels[data.lights[light].modelid].ct !== 'undefined') {
+                min = knownModels[data.lights[light].modelid].ct.min;
+                max = knownModels[data.lights[light].modelid].ct.max;
+            }
+            html += '<td><input type="range" name="ct" min="' + min + '" max="' + max + '" value="' + data.lights[light].state.ct + '"><span class="ct">' + data.lights[light].state.ct + '</span></td>';
         } else {
             html += '<td></td>';
         }
-        html += '<td class="alert">' + data.lights[light].state.alert + '</td>';
-        html += '<td>' + data.lights[light].state.colormode + '</td>';
+        html += '<td>';
+        html += '<select class="alert form-control">';
+        if (data.lights[light].state.alert === 'none') {
+            html += '<option value="none" selected>none</option>';
+        } else {
+            html += '<option value="none">none</option>';
+        }
+        if (data.lights[light].state.alert === 'select') {
+            html += '<option value="select" selected>select</option>';
+        } else {
+            html += '<option value="select">select</option>';
+        }
+        if (data.lights[light].state.alert === 'lselect') {
+            html += '<option value="lselect" selected>lselect</option>';
+        } else {
+            html += '<option value="lselect">lselect</option>';
+        }
+        html += '</select>';
+        html += '</td>';
+        if (typeof data.lights[light].state.colormode !== 'undefined') {
+            html += '<td>' + data.lights[light].state.colormode + '</td>';
+        } else {
+            html += '<td></td>';
+        }
         html += '<td>' + data.lights[light].state.mode + '</td>';
         html += '<td>' + data.lights[light].state.reachable + '</td>';
         html += '<td>' + data.lights[light].swupdate.state + '</td>';
         html += '<td>' + data.lights[light].swupdate.lastinstall + '</td>';
         html += '<td>' + data.lights[light].swversion + '</td>';
         html += '<td>' + data.lights[light].config.archetype + '</td>';
-        html += '<td>' + data.lights[light].config.function + '</td>';
+        html += '<td>' + data.lights[light].config.function+'</td>';
         html += '<td>' + data.lights[light].config.direction + '</td>';
+        html += '<td>' + data.lights[light].capabilities.certified + '</td>';
         html += '</tr>';
     }
     $('#tblLights tbody').append(html);
@@ -57,13 +109,6 @@ $.get('http://' + ip + '/api/' + username, function (data) {
 }).fail(function () {
     alert('error');
 });
-
-var icons = {
-    "LCT015": "e27_waca",
-    "LWB010": "e27_white",
-    "RS 125": "gu10",
-    "RS 128 T": "gu10"
-}
 
 $('tbody').on('click', '.name', function () {
     var name = prompt('name', $(this).text());
@@ -118,7 +163,6 @@ $('tbody').on('click', '.on', function () {
 
 $('tbody').on('input', '[name="bri"]', function () {
     var bri = $(this).val();
-    console.log(bri);
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
@@ -142,8 +186,8 @@ $('tbody').on('input', '[name="bri"]', function () {
 
 $('tbody').on('click', '.bri', function () {
     var bri = prompt('bri', $(this).text());
-    if (bri < 1 || bri > 254) {
-        alert('bri must be between 1 and 254');
+    if (bri < 0 || bri > 254) {
+        alert('bri must be between 0 and 254');
         return false;
     }
     var light = $(this).parent().siblings('.light').text();
@@ -171,7 +215,6 @@ $('tbody').on('click', '.bri', function () {
 
 $('tbody').on('input', '[name="hue"]', function () {
     var hue = $(this).val();
-    console.log(hue);
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
@@ -224,7 +267,6 @@ $('tbody').on('click', '.hue', function () {
 
 $('tbody').on('input', '[name="sat"]', function () {
     var sat = $(this).val();
-    console.log(sat);
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
@@ -279,7 +321,7 @@ $('tbody').on('click', '.effect', function () {
     var effect;
     if ($(this).text() === 'none') {
         effect = 'colorloop';
-    } else if ($(this).text() === 'colorloop'){
+    } else if ($(this).text() === 'colorloop') {
         effect = 'none';
     }
     var light = $(this).parent().siblings('.light').text();
@@ -303,19 +345,19 @@ $('tbody').on('click', '.effect', function () {
     });
 });
 
-$('tbody').on('click', '.alert', function () {
-    var alert = prompt('alert', $(this).text());
-    var light = $(this).siblings('.light').text();
+$('tbody').on('input', '[name="ct"]', function () {
+    var ct = $(this).val();
+    var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
         url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
-            "alert": alert
+            "ct": Number(ct)
         }),
         success: function (data) {
             if (data[0].success) {
-                $(thisItem).text(data[0].success['/lights/' + light + '/state/alert']);
+                $(thisItem).siblings('span.ct').text(data[0].success['/lights/' + light + '/state/ct']);
             } else {
                 alert(data[0].error.description);
             }
@@ -328,11 +370,18 @@ $('tbody').on('click', '.alert', function () {
 
 $('tbody').on('click', '.ct', function () {
     var ct = prompt('ct', $(this).text());
-    if (ct < 153 || ct > 500) {
-        alert('ct must be between 153 and 500');
+    var modelid = $(this).parent().siblings('.modelid').text();
+    var min = 153;
+    var max = 500;
+    if (typeof knownModels[modelid].ct !== 'undefined') {
+        min = knownModels[modelid].ct.min;
+        max = knownModels[modelid].ct.max;
+    }
+    if (ct < min || ct > max) {
+        alert('ct must be between ' + min + ' and ' + max);
         return false;
     }
-    var light = $(this).siblings('.light').text();
+    var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
         url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
@@ -342,7 +391,32 @@ $('tbody').on('click', '.ct', function () {
         }),
         success: function (data) {
             if (data[0].success) {
-                $(thisItem).text(data[0].success['/lights/' + light + '/state/ct']);
+                var returnVal = data[0].success['/lights/' + light + '/state/ct'];
+                $(thisItem).text(returnVal);
+                $(thisItem).siblings('input').val(returnVal);
+            } else {
+                alert(data[0].error.description);
+            }
+        },
+        error: function () {
+            alert('error');
+        }
+    });
+});
+
+$('tbody').on('change', '.alert', function () {
+    var alert = $(this).val();
+    var light = $(this).parent().siblings('.light').text();
+    var thisItem = this;
+    $.ajax({
+        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        method: 'put',
+        data: JSON.stringify({
+            "alert": alert
+        }),
+        success: function (data) {
+            if (data[0].success) {
+                $(thisItem).val(data[0].success['/lights/' + light + '/state/alert']);
             } else {
                 alert(data[0].error.description);
             }
