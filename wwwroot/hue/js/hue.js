@@ -31,7 +31,7 @@ $.get('http://' + ip + '/api/' + username, function (data) {
     console.log(data);
     var html = '';
     for (var light in data.lights) {
-        html += '<tr>';
+        html += '<tr id="lightRow' + light + '">';
         html += tdWrap(light, 'light');
         html += tdWrap(data.lights[light].manufacturername);
         html += tdWrap(data.lights[light].productname);
@@ -113,13 +113,16 @@ $.get('http://' + ip + '/api/' + username, function (data) {
                 //name
                 //unique id?
                 // on
-
                 //bri
+                updateVal(lightVal, 'bri', data.state.bri);
                 // hue
+                updateVal(lightVal, 'hue', data.state.hue);
                 //sat
+                updateVal(lightVal, 'sat', data.state.sat);
                 //effect
                 //xy
                 //ct
+                updateVal(lightVal, 'ct', data.state.ct);
                 //alert
                 //colormode
                 //reachable
@@ -128,7 +131,7 @@ $.get('http://' + ip + '/api/' + username, function (data) {
                 //swversion
                 //
             });
-        }, 10000, light);
+        }, 5000, light); // probably better getting every light at once due to server response issues
     }
     $('#tblLights tbody').append(html);
     html = '';
@@ -136,8 +139,9 @@ $.get('http://' + ip + '/api/' + username, function (data) {
     alert('error');
 });
 
-function updateBri(light, val){
-
+function updateVal(light, prop, val, type) {
+    $('#lightRow' + light + ' [name="' + prop + '"]').val(val);
+    $('#lightRow' + light + ' .' + prop).text(val);
 }
 
 $('tbody').on('click', '.name', function () {
