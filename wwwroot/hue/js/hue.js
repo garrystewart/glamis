@@ -12,6 +12,9 @@ var knownModels = {
     "LWB010": {
         "icon": "e27_white"
     },
+    "LTW010":{
+        "icon": "e27_waca"
+    },
     "RS 125": {
         "icon": "gu10"
     },
