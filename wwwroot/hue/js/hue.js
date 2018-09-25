@@ -12,7 +12,7 @@ var knownModels = {
     "LWB010": {
         "icon": "e27_white"
     },
-    "LTW010":{
+    "LTW010": {
         "icon": "e27_waca"
     },
     "RS 125": {
@@ -106,17 +106,39 @@ $.get('http://' + ip + '/api/' + username, function (data) {
         html += tdWrap(data.lights[light].config.direction);
         html += tdWrap(data.lights[light].capabilities.certified);
         html += '</tr>';
-        /*setInterval(function (light) {
-            $.get('http://' + ip + '/api/' + username + '/lights/' + light, function (data) {
+        setInterval(function (lightVal) {
+            $.get('http://' + ip + '/api/' + username + '/lights/' + lightVal, function (data) {
                 console.log(data);
-            }(light));
-        }, 10000);*/
+                // what's likely to change?
+                //name
+                //unique id?
+                // on
+
+                //bri
+                // hue
+                //sat
+                //effect
+                //xy
+                //ct
+                //alert
+                //colormode
+                //reachable
+                //state
+                //last install
+                //swversion
+                //
+            });
+        }, 10000, light);
     }
     $('#tblLights tbody').append(html);
     html = '';
 }).fail(function () {
     alert('error');
 });
+
+function updateBri(light, val){
+
+}
 
 $('tbody').on('click', '.name', function () {
     var name = prompt('name', $(this).text());
