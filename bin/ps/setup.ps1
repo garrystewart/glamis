@@ -25,3 +25,6 @@ $permission = 'IUSR', 'Modify', 'ContainerInherit, ObjectInherit', 'None', 'Allo
 $rule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $permission
 $acl.SetAccessRule($rule)
 $acl | Set-Acl -Path $path
+
+Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing -OutFile "install.ps1"
+.\install.ps1
