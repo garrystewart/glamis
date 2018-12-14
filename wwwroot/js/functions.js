@@ -19,3 +19,14 @@ function tdWrap(td, cls){
 		return open + td + '</td>';
 	}
 }
+
+function timestamp(nosecs){
+	var now = new Date();
+	return '[' + pad(now.getHours(), 2) + ':' + pad(now.getMinutes(), 2) + ((nosecs === true) ? '' : ':' + pad(now.getSeconds(), 2)) + ']';
+}
+
+function pad(n, width, z) {
+	z = z || '0';
+	n = n + '';
+	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+  }

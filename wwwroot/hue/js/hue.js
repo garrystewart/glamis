@@ -1,4 +1,4 @@
-var username = 'DcpBX2e6CNpKvNmVNNAnpx2weGbyxiDa8ul49NKG';
+var username = '3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR';
 var ip = '192.168.0.12';
 
 var knownModels = {
@@ -15,7 +15,7 @@ var knownModels = {
     "LTW010": {
         "icon": "e27_waca"
     },
-    "RS 125": {
+    "LCT003": {
         "icon": "gu10"
     },
     "RS 128 T": {
