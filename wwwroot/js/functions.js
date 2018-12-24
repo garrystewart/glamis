@@ -40,3 +40,7 @@ function timeElapsed(iso, unit){
 	iso = moment(iso);
 	return moment.duration(-Math.abs(now.diff(iso, unit)), unit).humanize(true);
 }
+
+function log(message) {
+	console.log(`${timestamp()} message`);
+}
