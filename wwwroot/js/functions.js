@@ -41,6 +41,11 @@ function timeElapsed(iso, unit){
 	return moment.duration(-Math.abs(now.diff(iso, unit)), unit).humanize(true);
 }
 
-function log(message) {
-	console.log(`${timestamp()} message`);
+function log(message, type) {
+	if (typeof type === 'undefined') type = 'log';
+	try {
+		console[type](`${timestamp()} ${message}`);
+	} catch (err) {
+		console.error(err);
+	}
 }

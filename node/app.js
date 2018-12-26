@@ -2,13 +2,68 @@ const request = require('request');
 const moment = require('moment');
 const fs = require('fs');
 
-const _ip = '192.168.0.83';
-const _username = '3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR';
+const ip = '192.168.0.83';
+const username = '3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR';
 
-var _timeout = 1000;
+var _timeout = 30000;
 
-log(`Requesting all sensors from ${_ip}...`);
-request('http://' + _ip + '/api/' + _username + '/sensors', function (err, res, objAllSensors) {
+// test modes - eventually  be written into config file that Alexa can access
+var _mode = {
+	"halloween": false,
+	"visitor": false,
+	"film": false,
+	"cooking": false,
+	"bath": false
+}
+
+//TODO: bypass disabled devices, monitor again once enabled
+//TODO: rewrite for one http request instead of individual ones
+getHueJSON({
+	"ip": ip,
+	"username": username,
+	"api": "sensors"
+}, function(response){
+	console.log(response);
+});
+
+function getHueJSON(options, callback) {
+	// validation start
+	if (typeof options.ip === 'undefined') {
+		log('ip undefined', 'error');
+		callback(false);
+	}
+	if (typeof options.username === 'undefined') {
+		log('username undefined', 'error');
+		callback(false);
+	}
+	if (typeof options.which !== 'undefined' && typeof options.api === 'undefined') {
+		log('api undefined', 'error');
+		callback(false);
+	}
+	// validation end
+	var api;
+	if (typeof options.api !== 'undefined') {
+		switch (options.api) {
+			case 'sensors':
+				api = '/sensors';
+				break;		
+			default:
+				log('unknown api', 'error');
+				break;
+		}
+	}
+	log(`Requesting JSON from ${ip}...`);
+	request(`http://${options.ip}/api/${options.username}${api}`, function (err, res, json) {
+		if (!err) {
+			log('Request successful');
+			callback(JSON.parse(json));
+		} else {
+			log(err, 'error');
+			callback(false);
+		}
+	});
+}
+/*request('http://' + _ip + '/api/' + _username + '/sensors', function (err, res, objAllSensors) {
 	if (!err) {
 		log('Request successful');
 		log('Checking for motion sensors...');
@@ -32,19 +87,31 @@ request('http://' + _ip + '/api/' + _username + '/sensors', function (err, res, 
 	} else {
 		log(err);
 	}
-});
+});*/
 
 function sensorCheck(intSensor, objMotionSensors) {
 	setTimeout(function () {
 		request('http://' + _ip + '/api/' + _username + '/sensors/' + intSensor, function (err, res, objThisSensor) {
 			if (!err) {
 				objThisSensor = JSON.parse(objThisSensor);
-				if (moment(objThisSensor.state.lastupdated).isAfter(objMotionSensors[intSensor].state.lastupdated) &&
-				objThisSensor.state.presence !== false) {
-					log(`Motion detected (${objThisSensor.name})`);
-					objMotionSensors[intSensor].state.lastupdated = objThisSensor.state.lastupdated;
-				}
+				/*if (objThisSensor.state.lastupdated === 'none' && objMotionSensors[intSensor].state.lastupdated !== 'none') {
+					log(`Motion sensor disabled (${objMotionSensors[intSensor].name})`);
+				} else if (objMotionSensors[intSensor].state.lastupdated === 'none' && objThisSensor.state.lastupdated !== 'none') {
+					log(`Motion sensor enabled (${objMotionSensors[intSensor].name})`);
+					continueSensorCheck();
+				} else {
+					continueSensorCheck();
+				}*/
+				continueSensorCheck();
 				sensorCheck(intSensor, objMotionSensors);
+
+				function continueSensorCheck() {
+					if (moment(objThisSensor.state.lastupdated).isAfter(objMotionSensors[intSensor].state.lastupdated) &&
+						objThisSensor.state.presence !== false) {
+						objMotionSensors[intSensor].state.lastupdated = objThisSensor.state.lastupdated;
+						log(`Motion detected (${objThisSensor.name}) @ ${objMotionSensors[intSensor].state.lastupdated}`);
+					}
+				}
 			} else {
 				log(err);
 				sensorCheck(intSensor, objMotionSensors);
@@ -53,8 +120,13 @@ function sensorCheck(intSensor, objMotionSensors) {
 	}, _timeout);
 }
 
-function log(message) {
-	console.log(`${timestamp()} ${message}`);
+function log(message, type) {
+	if (typeof type === 'undefined') type = 'log';
+	try {
+		console[type](`${timestamp()} ${message}`);
+	} catch (err) {
+		console.error(err);
+	}
 }
 
 function timestamp(nosecs) {
