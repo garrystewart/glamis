@@ -17,8 +17,11 @@
         $('#btn_search').click(function () {
             var keyword = $('#ipt_search').val().toLowerCase();
             $('#div_result').empty();
-            $.getJSON('data/dvd.json', function (json) {
-                for (var id in json) {
+            $.ajax({
+                url: 'data/dvd.json',
+                cache: false,
+                success: function(json){
+                    for (var id in json) {
                     if (~json[id].box.title.toLowerCase().indexOf(keyword)) {
                         var html = '';
                         if (json[id].about.collection) {
@@ -74,8 +77,10 @@
                     }
                 }
                 if (!$('#div_result').children().length) alert('no results found');
-            }).fail(function () {
-                alert('failed to get db json');
+                },
+                error: function(){
+                    alert('failed to get db json');
+                }
             });
         });
         $('body').on('click', '.scanned', function () {
