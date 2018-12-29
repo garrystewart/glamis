@@ -1,0 +1,112 @@
+<head>
+    <style>
+        ul {
+            margin-top: 0px;
+            /*margin-bottom: 0px;*/
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" id="ipt_search">
+    <button id="btn_search">Search</button>
+    <div id="div_result"></div>
+    <textarea id="txt_output"></textarea>
+    <script src="../js/external/jquery-3.3.1.min.js"></script>
+    <script>
+        $('#btn_search').click(function () {
+            var keyword = $('#ipt_search').val().toLowerCase();
+            $('#div_result').empty();
+            $.getJSON('data/dvd.json', function (json) {
+                for (var id in json) {
+                    if (~json[id].box.title.toLowerCase().indexOf(keyword)) {
+                        var html = '';
+                        if (json[id].about.collection) {
+                            html += json[id].box.title;
+                            html += '<ul>';
+                            $(json[id].discs).each(function (index, item) {
+                                $.ajax({
+                                    url: 'https://www.omdbapi.com/?i=' + item.imdb +
+                                        '&apikey=591598d',
+                                    async: false,
+                                    success: function (json) {
+                                        html += '<li>'
+                                        html += json.Title;
+                                        html += ' <a class="scanned" data-id="' +
+                                            id + '" data-disc="' + index +
+                                            '" href="#">scanned</a>';
+                                        html += ' <a class="ripped" data-id="' + id +
+                                            '" data-disc="' + index +
+                                            '" href="#">ripped</a>';
+                                        html += '</li>';
+                                    },
+                                    error: function () {
+                                        alert('failed to get omdbapi json');
+                                    }
+                                });
+                            });
+                            html += '</ul>';
+                        } else {
+                            if (json[id].discs.length > 1) {
+                                html += json[id].box.title;
+                                html += '<ul>';
+                                $(json[id].discs).each(function (index, item) {
+                                    html += '<li>';
+                                    html += item.content;
+                                    html += ' <a class="scanned" data-id="' + id +
+                                        '" data-disc="' + index + '" href="#">scanned</a>';
+                                    html += ' <a class="ripped" data-id="' + id +
+                                        '" data-disc="' + index + '" href="#">ripped</a>';
+                                    html += '</li>';
+                                });
+                                html += '</ul>';
+                            } else {
+                                html += '<p>';
+                                html += json[id].box.title;
+                                html += ' <a class="scanned" data-id="' + id +
+                                    '" data-disc="0" href="#">scanned</a>';
+                                html += ' <a class="ripped" data-id="' + id +
+                                    '" data-disc="0" href="#">ripped</a>';
+                                html += '</p>';
+                            }
+                        }
+                        $('#div_result').append(html);
+                    }
+                }
+                if (!$('#div_result').children().length) alert('no results found');
+            }).fail(function () {
+                alert('failed to get db json');
+            });
+        });
+        $('body').on('click', '.scanned', function () {
+            var id = $(this).data('id');
+            var disc = $(this).data('disc');
+            $.ajax({
+                url: 'data/dvd.json',
+                cache: false,
+                success: function (json) {
+                    json[id].discs[disc].scanned = true;
+                    $('#txt_output').text(JSON.stringify(json)).select();
+                },
+                error: function () {
+                    alert('unable to get db json');
+                }
+            });
+        });
+        $('body').on('click', '.ripped', function () {
+            var id = $(this).data('id');
+            var disc = $(this).data('disc');
+            $.ajax({
+                url: 'data/dvd.json',
+                cache: false,
+                success: function (json) {
+                    json[id].discs[disc].ripped = true;
+                    $('#txt_output').text(JSON.stringify(json)).select();
+                },
+                error: function () {
+                    alert('unable to get db json');
+                }
+            });
+        });
+    </script>
+</body>

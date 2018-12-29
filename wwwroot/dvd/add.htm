@@ -1,0 +1,144 @@
+<body>
+    <h1>About</h1>
+    Collection?
+    <br>
+    <input type="radio" name="rad_collection" value="yes">yes
+    <input type="radio" name="rad_collection" value="no" checked>no
+    <div id="div_notCollection">
+        <br>
+        IMDb ID
+        <input type="text" id="ipt_imdb">
+        <br>
+        Rating
+        <input type="text" id="ipt_rating">
+    </div>
+    Notes
+    <br>
+    <textarea id="txt_otherNotes"></textarea>
+    <h1>Box</h1>
+    Title
+    <input type="text" id="ipt_title">
+    <br>
+    ISBN
+    <input type="text" id="ipt_isbn">
+    <br>
+    Grade
+    <select id="sel_boxGrade">
+        <option>excellent</option>
+        <option selected>very good</option>
+        <option>good</option>
+        <option>poor</option>
+    </select>
+    <br>
+    Material
+    <input type="text" id="ipt_material">
+    <br>
+    Notes
+    <br>
+    <textarea id="txt_boxNotes"></textarea>
+    <br>
+    <h1>Discs</h1>
+    Number
+    <input type="number" id="ipt_number">
+    <br>
+    <div id="div_discs"></div>
+    <br><br>
+    <button id="btn_add">Add</button>
+    <br><br>
+    <textarea id="txt_output"></textarea>
+    <script src="../js/external/jquery-3.3.1.min.js"></script>
+    <script>
+        $('[name="rad_collection"]').change(function () {
+            ($('[name="rad_collection"]:checked').val() === 'yes') ? $('#div_notCollection').hide(): $(
+                '#div_notCollection').show();
+        });
+        $('#ipt_number').on('input', function () {
+            var html = '';
+            for (var i = 0; i < $('#ipt_number').val(); i++) {
+                if ($('[name="rad_collection"]:checked').val() === 'yes') {
+                    html += 'IMDb ID';
+                    html += '<input type="text" id="ipt_discImdb_disc' + i + '">';
+                }
+                html += 'Content';
+                html += '<select id="sel_discContent_disc' + i + '">';
+                html += '<option>main feature</option>';
+                html += '<option>extra</option>';
+                html += '</select>';
+                if ($('[name="rad_collection"]:checked').val() === 'yes') {
+                    html += 'Rating';
+                    html += '<input type="text" id="ipt_discRating_disc' + i + '">';
+                }
+                html += 'Grade';
+                html += '<select id="sel_discGrade_disc' + i + '">';
+                html += '<option value="excellent" selected>excellent</option>';
+                html += '<option value="very good">very good</option>';
+                html += '<option value="good">good</option>';
+                html += '<option value="poor">poor</option>';
+                html += '</select>';
+                html += '<br>';
+            }
+            $('#div_discs').html(html);
+        });
+        $('#btn_add').click(function () {
+            $.getJSON('data/dvd.json', function (json) {
+                // create skeleton object
+                var objDVD = {
+                    "about": {
+                        "collection": "",
+                        "box": true
+                    },
+                    "box": {
+                        "title": "",
+                        "isbn": "",
+                        "grade": "",
+                        "material": ""
+                    },
+                    "discs": []
+                };
+                // start building the object
+                if ($('[name="rad_collection"]:checked').val() === 'yes') {
+                    objDVD.about.collection = true;
+                } else {
+                    objDVD.about.collection = false;
+                    objDVD.about['imdb'] = $('#ipt_imdb').val();
+                    objDVD.about['rating'] = $('#ipt_rating').val();
+                }
+
+                objDVD.box.title = $('#ipt_title').val();
+                if ($('#ipt_isbn').val()) objDVD.box.isbn = $('#ipt_isbn').val();
+                objDVD.box.grade = $('#sel_boxGrade').val();
+                objDVD.box.material = $('#ipt_material').val();
+                if ($('#txt_boxNotes').val()) objDVD.box['notes'] = $('#txt_boxNotes').val();
+
+                for (var i = 0; i < $('#ipt_number').val(); i++) {
+                    var objDisc = {
+                        "content": "",
+                        "grade": ""
+                    }
+                    if ($('[name="rad_collection"]:checked').val() === 'yes') {
+                        objDisc['imdb'] = $('#ipt_discImdb_disc' + i).val();
+                        objDisc['rating'] = $('#ipt_discRating_disc' + i).val();
+                    }
+                    objDisc.content = $('#sel_discContent_disc' + i).val();
+                    objDisc.grade = $('#sel_discGrade_disc' + i).val();
+                    objDVD.discs.push(objDisc);
+                }
+
+                if ($('#txt_otherNotes').val()) objDVD.about['notes'] = $('#txt_otherNotes').val();
+
+                json[Object.keys(json).length + 1] = objDVD;
+                console.log(objDVD);
+                $('#txt_output').text(JSON.stringify(json)).select();
+            }).fail(function () {
+                alert('failed to get db json');
+            });
+        });
+        $('#ipt_imdb').on('input', function () {
+            $.getJSON('https://www.omdbapi.com/?i=' + $(this).val() + '&apikey=591598d', function (json) {
+                $('#ipt_title').val(json.Title);
+            }).fail(function () {
+                alert('failed to get omdbapi json');
+            });
+        });
+    </script>
+</body>
