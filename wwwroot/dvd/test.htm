@@ -1,0 +1,15 @@
+<body>
+    <script src="../js/external/jquery-3.3.1.min.js"></script>
+    <script>
+        $.ajax({
+            url: 'php/scanned.php',
+            cache: false,
+            success: function (json) {
+                console.log(json);
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    </script>
+</body>
