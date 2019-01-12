@@ -1,0 +1,105 @@
+<script src="../js/external/jquery-3.3.1.min.js"></script>
+<script>
+    var plex = {
+        "host": "plex.glamis.casa",
+        "auth": "519pREE6zNyxCqVoxiDb",
+        "port": 32400,
+        "timeout": 1000,
+        "machineIdentifier": "knr89e14lyk4g4n6tvo3xqfo",
+        "state": ""
+    }
+    const hue = {
+        "ip": "192.168.0.83",
+        "auth": "3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR",
+        "group": "Downstairs"
+    }
+    timeout();
+    $.ajax({
+        url: `https://${hue.ip}/api/${hue.auth}/groups`,
+        method: 'GET',
+        success: function (groups) {
+            console.log(groups);
+            for (var id in groups) {
+                if (groups[id].name === hue.group) {
+                    hue.group = id;
+                    break;
+                }
+            }
+        },
+        error: function (err) {
+            console.error(err);
+        }
+    });
+
+    function timeout() {
+        setTimeout(function () {
+            $.ajax({
+                url: `https://${plex.host}:${plex.port}/status/sessions`,
+                cache: false,
+                method: 'GET',
+                data: {
+                    "X-Plex-Token": plex.auth
+                },
+                success: function (xml) {
+                    $(xml).find('Player').each(function (index, player) {
+                        if ($(player).attr('machineIdentifier') === plex.machineIdentifier) {
+                            var stateChange = false;
+                            if ($(player).attr('state') !== plex.state) stateChange = true;
+                            plex.state = $(player).attr('state');
+                            switch ($(player).attr('state')) {
+                                case 'playing':
+                                    if (stateChange) {
+                                        $.ajax({
+                                            url: `https://${hue.ip}/api/${hue.auth}/groups/${hue.group}/action`,
+                                            method: 'PUT',
+                                            data: JSON.stringify({
+                                                "on": true,
+                                                "bri": 0,
+                                                "hue": 0,
+                                                "sat": 254,
+                                            }),
+                                            success: function (response) {},
+                                            error: function (err) {
+                                                console.error(err);
+                                            }
+                                        });
+                                    }
+                                    break;
+                                case 'paused':
+                                    if (stateChange) {
+                                        $.ajax({
+                                            url: `https://${hue.ip}/api/${hue.auth}/groups/${hue.group}/action`,
+                                            method: 'PUT',
+                                            data: JSON.stringify({
+                                                "on": true,
+                                                "bri": 254,
+                                                "sat": 0,
+                                            }),
+                                            success: function (response) {
+                                                console.log(response);
+                                            },
+                                            error: function (err) {
+                                                console.error(err);
+                                            }
+                                        });
+                                    }
+                                    break;
+                                default:
+                                    console.warn(
+                                        `switch warning (${$(player).attr('state')})`);
+                                    break;
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+                    timeout();
+                },
+                error: function (err) {
+                    console.error(err);
+                    timeout();
+                }
+            });
+        }, plex.timeout);
+    }
+</script>

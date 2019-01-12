@@ -1,5 +1,5 @@
 var username = '3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR';
-var ip = '192.168.0.12';
+var ip = '192.168.0.83';
 
 var knownModels = {
     "LCT015": {
@@ -27,7 +27,7 @@ var knownModels = {
     }
 };
 
-$.get('http://' + ip + '/api/' + username, function (data) {
+$.get('https://' + ip + '/api/' + username, function (data) {
     console.log(data);
     var html = '';
     for (var light in data.lights) {
@@ -107,7 +107,7 @@ $.get('http://' + ip + '/api/' + username, function (data) {
         html += tdWrap(data.lights[light].capabilities.certified);
         html += '</tr>';
         setInterval(function (lightVal) {
-            $.get('http://' + ip + '/api/' + username + '/lights/' + lightVal, function (data) {
+            $.get('https://' + ip + '/api/' + username + '/lights/' + lightVal, function (data) {
                 console.log(data);
                 // what's likely to change?
                 //name
@@ -149,7 +149,7 @@ $('tbody').on('click', '.name', function () {
     var light = $(this).siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light,
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light,
         method: 'put',
         data: JSON.stringify({
             "name": name
@@ -177,7 +177,7 @@ $('tbody').on('click', '.on', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "on": on
@@ -200,7 +200,7 @@ $('tbody').on('input', '[name="bri"]', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "bri": Number(bri)
@@ -227,7 +227,7 @@ $('tbody').on('click', '.bri', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "bri": Number(bri)
@@ -252,7 +252,7 @@ $('tbody').on('input', '[name="hue"]', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "hue": Number(hue)
@@ -279,7 +279,7 @@ $('tbody').on('click', '.hue', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "hue": Number(hue)
@@ -304,7 +304,7 @@ $('tbody').on('input', '[name="sat"]', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "sat": Number(sat)
@@ -331,7 +331,7 @@ $('tbody').on('click', '.sat', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "sat": Number(sat)
@@ -361,7 +361,7 @@ $('tbody').on('click', '.effect', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "effect": effect
@@ -384,7 +384,7 @@ $('tbody').on('input', '[name="ct"]', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "ct": Number(ct)
@@ -418,7 +418,7 @@ $('tbody').on('click', '.ct', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "ct": Number(ct)
@@ -443,7 +443,7 @@ $('tbody').on('change', '.alert', function () {
     var light = $(this).parent().siblings('.light').text();
     var thisItem = this;
     $.ajax({
-        url: 'http://' + ip + '/api/' + username + '/lights/' + light + '/state',
+        url: 'https://' + ip + '/api/' + username + '/lights/' + light + '/state',
         method: 'put',
         data: JSON.stringify({
             "alert": alert

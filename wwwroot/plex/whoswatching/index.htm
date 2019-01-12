@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="http://glamis.casa/css/external/bootstrap.min.css">
+
+    <title>Who's watching Plex</title>
+</head>
+
+<body>
+    <div class="container-fluid mt-2">
+        <p class="lead mb-2">Real-time data</p>
+        <div id="div_results">Checking...</div>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="http://glamis.casa/js/external/jquery-3.3.1.min.js"></script>
+        <script src="http://glamis.casa/js/external/popper.min.js"></script>
+        <script src="http://glamis.casa/js/external/bootstrap.min.js"></script>
+        <script>
+            const plex = {
+                "host": "plex.glamis.casa",
+                "auth": "519pREE6zNyxCqVoxiDb",
+                "port": 32400,
+                "timeout": 1000
+            }
+            timeout();
+
+            function timeout() {
+                setTimeout(function () {
+                    $.ajax({
+                        url: `http://${plex.host}:${plex.port}/status/sessions`,
+                        cache: false,
+                        method: 'GET',
+                        data: {
+                            "X-Plex-Token": plex.auth
+                        },
+                        success: function (xml) {
+                            console.log(xml);
+                            $('#div_results').empty();
+                            var arrVideos = $(xml).find('MediaContainer').children();
+                            if (arrVideos.length) {
+                                var text = '';
+                                $(arrVideos).each(function (index, video) {
+                                        var strLocation;
+                                        switch ($(video).children('Session').attr(
+                                        'location')) {
+                                            case 'wan':
+                                                strLocation =
+                                                    'via the Internet on a home network';
+                                                break;
+                                            case 'lan':
+                                                strLocation =
+                                                    'at Glamis Drive. This will not affect the quality of other streams.';
+                                                break;
+                                            case 'cellular':
+                                                strLocation =
+                                                    'via the Internet on a mobile network';
+                                                break;
+                                            default:
+                                                strLocation = 'from an unknown location';
+                                                break;
+                                        }
+                                        text +=
+                                            `${$(video).children('User').attr('title')} is watching ${$(video).attr('title')} (${$(video).children('Player').attr('state')}) ${strLocation}<br>`;
+                                });
+                                if (text === '') {
+                                    $('#div_results').html(
+                                        'No videos currently streaming');
+                                } else {
+                                    $('#div_results').html(text);
+                                }
+                            } else {
+                                $('#div_results').html(
+                                    'No videos currently streaming');
+                            }
+                            timeout();
+                        },
+                        error: function (err) {
+                            console.error(err);
+                            timeout();
+                        }
+                    });
+                }, plex.timeout);
+            }
+        </script>
+</body>
+
+</html>

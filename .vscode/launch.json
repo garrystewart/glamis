@@ -10,6 +10,12 @@
             "request": "launch",
             "name": "Launch Program",
             "program": "${workspaceFolder}/node\\app.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch plex.js",
+            "program": "${workspaceFolder}/node\\plex.js"
         }
     ]
 }
