@@ -1,4 +1,4 @@
-<script src="../js/external/jquery-3.3.1.min.js"></script>
+<script src="http://glamis.casa/js/external/jquery-3.3.1.min.js"></script>
 <script>
     var plex = {
         "host": "plex.glamis.casa",
@@ -11,11 +11,11 @@
     const hue = {
         "ip": "192.168.0.83",
         "auth": "3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR",
-        "group": "Downstairs"
+        "group": "Spare room"
     }
     timeout();
     $.ajax({
-        url: `https://${hue.ip}/api/${hue.auth}/groups`,
+        url: `http://${hue.ip}/api/${hue.auth}/groups`,
         method: 'GET',
         success: function (groups) {
             console.log(groups);
@@ -34,7 +34,7 @@
     function timeout() {
         setTimeout(function () {
             $.ajax({
-                url: `https://${plex.host}:${plex.port}/status/sessions`,
+                url: `http://${plex.host}:${plex.port}/status/sessions`,
                 cache: false,
                 method: 'GET',
                 data: {
