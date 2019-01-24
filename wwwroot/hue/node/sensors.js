@@ -105,12 +105,87 @@ request({
             }, motionTimeout);
         }
 
+        function motionDetected_isBetween(options) {
+            var now = new moment();
+            var time1 = new moment(`${now.format('YYYY-MM-DD')}T${options.time1.time}`);
+            var time2 = new moment(`${now.format('YYYY-MM-DD')}T${options.time2.time}`);
+            if (now.isBetween(time1, time2, 'seconds')) {
+                motionDetected_action('1');
+            } else {
+                motionDetected_action('2');
+            }
+
+            function motionDetected_action(int) {
+                log(`Switching ${options.group.name} lights to ${options[`time${int}`].name} mode...`);
+                request({
+                    url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
+                    method: 'PUT',
+                    form: JSON.stringify({
+                        "hue": options[`time${int}`].hue,
+                        "sat": options[`time${int}`].sat,
+                        "on": true,
+                        "bri": options[`time${int}`].bri
+                    })
+                }, function (err, httpResponse, body) {
+                    if (err === null) {
+                        log(body);
+                        log(`Switched ${options.group.name} lights to ${options[`time${int}`].name} mode`);
+                        if (typeof global[`timeout${options.group.name}`] === 'object') {                            
+                            clearTimeout(global[`timeout${options.group.name}`]);
+                        }                        
+                        log(`Switching off ${options.group.name} lights in ${options[`time${int}`].timeout}ms`);
+                        global[`timeout${options.group.name}`] = setTimeout(function () {
+                            log(`Switching off ${options.group.name} lights...`);
+                            request({
+                                url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
+                                method: 'PUT',
+                                form: JSON.stringify({
+                                    "on": false
+                                })
+                            }, function (err, httpResponse, body) {
+                                if (err === null) {
+                                    log(body);
+                                    log(`Switched off ${options.group.name} lights`);
+                                } else {
+                                    log('Error');
+                                }
+                            });
+                        }, options[`time${int}`].timeout);
+                    } else {
+                        log('Error');
+                    }
+                });
+            }
+        }
+
         function motionDetected(sensor) {
             var now = new moment();
-            log(`Motion detected (${jsonMotionSensors[sensor].name})`);            
+            log(`Motion detected (${jsonMotionSensors[sensor].name})`);
             switch (sensor) {
-                case '46': // bedroom                
-                    var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
+                case '46': // bedroom  
+                    motionDetected_isBetween({
+                        "time1": {
+                            "time": "07:00:00",
+                            "name": "day",
+                            "hue": 0,
+                            "sat": 0,
+                            "bri": 254,
+                            "timeout": 900000,
+                        },
+                        "time2": {
+                            "time": "22:00:00",
+                            "name": "night",
+                            "hue": 0,
+                            "sat": 254,
+                            "bri": 0,
+                            "timeout": 30000,
+                        },
+                        "group": {
+                            "id": 8,
+                            "name": "Bedroom"
+                        }
+                    });
+                    /*var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
                     var time2 = new moment(`${now.format('YYYY-MM-DD')}T22:00:00`);
                     if (now.isBetween(time1, time2, 'seconds')) {
                         log('Switching bedroom light to day mode...');
@@ -127,7 +202,10 @@ request({
                             if (err === null) {
                                 log(body);
                                 log('Switched bedroom light to day mode');
-                                log('Switching off bedroom light in 900000ms');
+                                log('Switching off bedroom light in 60000ms');
+                                if (typeof timeoutBedroom === 'object') {
+                                    clearTimeout(timeoutBedroom);
+                                }
                                 timeoutBedroom = setTimeout(function () {
                                     log('Switching off bedroom light...');
                                     request({
@@ -142,9 +220,9 @@ request({
                                             log('Switched off bedroom light');
                                         } else {
                                             log('Error');
-                                        }                                        
+                                        }
                                     });
-                                }, 900000);                                
+                                }, 60000);
                             } else {
                                 log('Error');
                             }
@@ -179,16 +257,16 @@ request({
                                             log('Switched off bedroom light');
                                         } else {
                                             log('Switched off bedroom light');
-                                        }                                        
+                                        }
                                     });
-                                }, 30000);                                
+                                }, 30000);
                             } else {
                                 log('Error');
                             }
                         });
-                    }
+                    }*/
                     break;
-                    case '11': // kitchen                
+                case '11': // kitchen                
                     var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
                     var time2 = new moment(`${now.format('YYYY-MM-DD')}T23:59:59`);
                     if (now.isBetween(time1, time2, 'seconds')) {
@@ -221,9 +299,9 @@ request({
                                             log('Switched off kitchen lights');
                                         } else {
                                             log('Error');
-                                        }                                    
+                                        }
                                     });
-                                }, 900000);                                
+                                }, 900000);
                             } else {
                                 log('Error');
                             }
@@ -258,16 +336,16 @@ request({
                                             log('Switched off kitchen lights');
                                         } else {
                                             log('Error');
-                                        }                                    
+                                        }
                                     });
-                                }, 30000);                                
+                                }, 30000);
                             } else {
                                 log('Error');
                             }
                         });
                     }
-                    break;                    
-                    case '8': // hallway                
+                    break;
+                case '8': // hallway                
                     var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
                     var time2 = new moment(`${now.format('YYYY-MM-DD')}T23:59:59`);
                     if (now.isBetween(time1, time2, 'seconds')) {
@@ -300,9 +378,9 @@ request({
                                             log('Switched off hallway lights');
                                         } else {
                                             log('Error');
-                                        }                                    
+                                        }
                                     });
-                                }, 900000);                                
+                                }, 900000);
                             } else {
                                 log('Error');
                             }
@@ -337,16 +415,16 @@ request({
                                             log('Switched off hallway lights');
                                         } else {
                                             log('Error');
-                                        }                                    
+                                        }
                                     });
-                                }, 30000);                                
+                                }, 30000);
                             } else {
                                 log('Error');
                             }
                         });
                     }
-                    break;        
-                    case '14': // hallway                
+                    break;
+                case '14': // hallway                
                     var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
                     var time2 = new moment(`${now.format('YYYY-MM-DD')}T23:59:59`);
                     if (now.isBetween(time1, time2, 'seconds')) {
@@ -379,9 +457,9 @@ request({
                                             log('Switched off hallway lights');
                                         } else {
                                             log('Error');
-                                        }                                    
+                                        }
                                     });
-                                }, 900000);                                
+                                }, 900000);
                             } else {
                                 log('Error');
                             }
@@ -416,15 +494,15 @@ request({
                                             log('Switched off hallway lights');
                                         } else {
                                             log('Error');
-                                        }                                    
+                                        }
                                     });
-                                }, 30000);                                
+                                }, 30000);
                             } else {
                                 log('Error');
                             }
                         });
                     }
-                    break;                                                            
+                    break;
             }
         }
     });
