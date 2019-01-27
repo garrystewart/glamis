@@ -5,7 +5,19 @@ const hue = {
     "ip": "192.168.0.10",
     "auth": "3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR"
 }
+const plex = {
+    "host": "plex.glamis.casa",
+    "auth": "519pREE6zNyxCqVoxiDb",
+    "port": 32400,
+    "machineIdentifier": "knr89e14lyk4g4n6tvo3xqfo",
+}
+const timeout = {
+    "motion": 1000,
+    "plex": 1000,
+    "temperature": 300000
+}
 const motionTimeout = 1000;
+const plexTimeout = 1000;
 const temperatureTimeout = 300000;
 log(`Initialising hue.glamis.casa version ${version}`);
 //log('Getting lights...');
@@ -95,10 +107,54 @@ request({
                 request(`http://${hue.ip}/api/${hue.auth}/sensors`, function (err, httpResponse, jsonSensors) {
                     jsonSensors = JSON.parse(jsonSensors);
                     for (var sensor in jsonMotionSensors) {
-                        if (moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated) && jsonSensors[sensor].state.presence !== false) {
-                            jsonMotionSensors[sensor].state.lastupdated = jsonSensors[sensor].state.lastupdated;
-                            motionDetected(sensor);
-                        }
+                        /*if (sensor === '50') { // spare room plex code
+                            var time = new moment().subtract(5, 'minutes');
+                            if (moment(jsonSensors[sensor].state.lastupdated).isAfter(time)) { // start checking plex
+                                /*checkPlex();
+
+                                function checkPlex() {
+                                    timeoutPlex = setTimeout(function () {
+                                        checkPlex();
+                                    }, timeout.plex);
+                                }
+                                if (moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated)) {
+                                    //clearTimeout(timeoutPlex);
+                                    motionDetected(sensor);
+                                }
+                            } else { // stop checking plex if already started and follow normal rules
+                                if (moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated)) {
+                                    //clearTimeout(timeoutPlex);
+                                    motionDetected(sensor);
+                                }
+                            }
+                        } else {*/
+                            //if (sensor === '46') {
+                            //console.log(`Last updated: ${jsonSensors[sensor].state.lastupdated}`);
+                            //console.log(jsonMotionSensors[sensor].state.lastupdated);
+                            //console.log(`Presence: ${jsonSensors[sensor].state.presence}`);
+                            if (moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated) /* && jsonSensors[sensor].state.presence !== false*/ ) {
+                                // send signal back to bridge to change presence to false. otherwise, if you continue to walk around, presence will never change from true and eventually
+                                // timer will kick in a lights will go out. You'd need to stand still for 10 seconds for presence to reset
+                                log(`Changing ${jsonMotionSensors[sensor].name} sensor presence to false...`);
+                                request({
+                                    url: `http://${hue.ip}/api/${hue.auth}/sensors/${sensor}/state`,
+                                    method: 'PUT',
+                                    form: JSON.stringify({
+                                        "presence": false
+                                    })
+                                }, function (err, httpResponse, body) {
+                                    if (err === null) {
+                                        log(body);
+                                        log(`Changed ${jsonMotionSensors[sensor].name} sensor presence to false`);
+                                    } else {
+                                        log('Error');
+                                    }
+                                });
+                                jsonMotionSensors[sensor].state.lastupdated = jsonSensors[sensor].state.lastupdated;
+                                motionDetected(sensor);
+                            }
+                            //}
+                        //}
                     }
                     checkMotionSensors();
                 });
@@ -130,9 +186,9 @@ request({
                     if (err === null) {
                         log(body);
                         log(`Switched ${options.group.name} lights to ${options[`time${int}`].name} mode`);
-                        if (typeof global[`timeout${options.group.name}`] === 'object') {                            
+                        if (typeof global[`timeout${options.group.name}`] === 'object') {
                             clearTimeout(global[`timeout${options.group.name}`]);
-                        }                        
+                        }
                         log(`Switching off ${options.group.name} lights in ${options[`time${int}`].timeout}ms`);
                         global[`timeout${options.group.name}`] = setTimeout(function () {
                             log(`Switching off ${options.group.name} lights...`);
@@ -185,323 +241,126 @@ request({
                             "name": "Bedroom"
                         }
                     });
-                    /*var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
-                    var time2 = new moment(`${now.format('YYYY-MM-DD')}T22:00:00`);
-                    if (now.isBetween(time1, time2, 'seconds')) {
-                        log('Switching bedroom light to day mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/lights/12/state`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 0,
-                                "on": true,
-                                "bri": 254
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched bedroom light to day mode');
-                                log('Switching off bedroom light in 60000ms');
-                                if (typeof timeoutBedroom === 'object') {
-                                    clearTimeout(timeoutBedroom);
-                                }
-                                timeoutBedroom = setTimeout(function () {
-                                    log('Switching off bedroom light...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/lights/12/state`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off bedroom light');
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, 60000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    } else {
-                        log('Switching bedroom light to night mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/lights/12/state`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 254,
-                                "on": true,
-                                "bri": 0
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched bedroom light to night mode');
-                                log('Switching off bedroom light in 30000ms');
-                                timeoutBedroom = setTimeout(function () {
-                                    log('Switching off bedroom light...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/lights/12/state`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off bedroom light');
-                                        } else {
-                                            log('Switched off bedroom light');
-                                        }
-                                    });
-                                }, 30000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    }*/
                     break;
-                case '11': // kitchen                
-                    var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
-                    var time2 = new moment(`${now.format('YYYY-MM-DD')}T23:59:59`);
-                    if (now.isBetween(time1, time2, 'seconds')) {
-                        log('Switching kitchen lights to day mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/groups/1/action`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 0,
-                                "on": true,
-                                "bri": 254
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched kitchen lights to day mode');
-                                log('Switching off kitchen lights in 900000ms');
-                                timeoutKitchen = setTimeout(function () {
-                                    log('Switching off kitchen lights...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/groups/1/action`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off kitchen lights');
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, 900000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    } else {
-                        log('Switching kitchen lights to night mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/groups/1/action`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 254,
-                                "on": true,
-                                "bri": 0
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched kitchen lights to night mode');
-                                log('Switching off kitchen lights in 30000ms');
-                                timeoutKitchen = setTimeout(function () {
-                                    log('Switching off kitchen lights...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/groups/1/action`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off kitchen lights');
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, 30000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    }
+                case '11': // kitchen  
+                    motionDetected_isBetween({
+                        "time1": {
+                            "time": "07:00:00",
+                            "name": "day",
+                            "hue": 0,
+                            "sat": 0,
+                            "bri": 254,
+                            "timeout": 900000,
+                        },
+                        "time2": {
+                            "time": "23:59:59",
+                            "name": "night",
+                            "hue": 0,
+                            "sat": 254,
+                            "bri": 0,
+                            "timeout": 30000,
+                        },
+                        "group": {
+                            "id": 1,
+                            "name": "Kitchen"
+                        }
+                    });
                     break;
-                case '8': // hallway                
-                    var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
-                    var time2 = new moment(`${now.format('YYYY-MM-DD')}T23:59:59`);
-                    if (now.isBetween(time1, time2, 'seconds')) {
-                        log('Switching hallway lights to day mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 0,
-                                "on": true,
-                                "bri": 254
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched hallway lights to day mode');
-                                log('Switching off hallway lights in 900000ms');
-                                timeoutHallway = setTimeout(function () {
-                                    log('Switching off hallway lights...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off hallway lights');
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, 900000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    } else {
-                        log('Switching hallway lights to night mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 254,
-                                "on": true,
-                                "bri": 0
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched hallway lights to night mode');
-                                log('Switching off hallway lights in 30000ms');
-                                timeoutHallway = setTimeout(function () {
-                                    log('Switching off hallway lights...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off hallway lights');
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, 30000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    }
+                case '8': // hallway     
+                    motionDetected_isBetween({
+                        "time1": {
+                            "time": "07:00:00",
+                            "name": "day",
+                            "hue": 0,
+                            "sat": 0,
+                            "bri": 254,
+                            "timeout": 900000,
+                        },
+                        "time2": {
+                            "time": "23:59:59",
+                            "name": "night",
+                            "hue": 0,
+                            "sat": 254,
+                            "bri": 0,
+                            "timeout": 30000,
+                        },
+                        "group": {
+                            "id": 5,
+                            "name": "Hallway"
+                        }
+                    });
                     break;
                 case '14': // hallway                
-                    var time1 = new moment(`${now.format('YYYY-MM-DD')}T07:00:00`);
-                    var time2 = new moment(`${now.format('YYYY-MM-DD')}T23:59:59`);
-                    if (now.isBetween(time1, time2, 'seconds')) {
-                        log('Switching hallway lights to day mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 0,
-                                "on": true,
-                                "bri": 254
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched hallway lights to day mode');
-                                log('Switching off hallway lights in 900000ms');
-                                timeoutHallway = setTimeout(function () {
-                                    log('Switching off hallway lights...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off hallway lights');
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, 900000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    } else {
-                        log('Switching hallway lights to night mode...');
-                        request({
-                            url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                            method: 'PUT',
-                            form: JSON.stringify({
-                                "hue": 0,
-                                "sat": 254,
-                                "on": true,
-                                "bri": 0
-                            })
-                        }, function (err, httpResponse, body) {
-                            if (err === null) {
-                                log(body);
-                                log('Switched hallway lights to night mode');
-                                log('Switching off hallway lights in 30000ms');
-                                timeoutHallway = setTimeout(function () {
-                                    log('Switching off hallway lights...');
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/groups/5/action`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        if (err === null) {
-                                            log(body);
-                                            log('Switched off hallway lights');
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, 30000);
-                            } else {
-                                log('Error');
-                            }
-                        });
-                    }
+                    motionDetected_isBetween({
+                        "time1": {
+                            "time": "07:00:00",
+                            "name": "day",
+                            "hue": 0,
+                            "sat": 0,
+                            "bri": 254,
+                            "timeout": 900000,
+                        },
+                        "time2": {
+                            "time": "23:59:59",
+                            "name": "night",
+                            "hue": 0,
+                            "sat": 254,
+                            "bri": 0,
+                            "timeout": 30000,
+                        },
+                        "group": {
+                            "id": 14,
+                            "name": "Hallway"
+                        }
+                    });
+                    break;
+                case '55': // bathroom                
+                    motionDetected_isBetween({
+                        "time1": {
+                            "time": "07:00:00",
+                            "name": "day",
+                            "hue": 0,
+                            "sat": 0,
+                            "bri": 254,
+                            "timeout": 900000,
+                        },
+                        "time2": {
+                            "time": "23:59:59",
+                            "name": "night",
+                            "hue": 0,
+                            "sat": 254,
+                            "bri": 0,
+                            "timeout": 30000,
+                        },
+                        "group": {
+                            "id": 4,
+                            "name": "Bathroom"
+                        }
+                    });
+                    break;
+                case '50': // spare room
+                    motionDetected_isBetween({
+                        "time1": {
+                            "time": "07:00:00",
+                            "name": "day",
+                            "hue": 0,
+                            "sat": 0,
+                            "bri": 254,
+                            "timeout": 900000,
+                        },
+                        "time2": {
+                            "time": "22:00:00",
+                            "name": "night",
+                            "hue": 0,
+                            "sat": 254,
+                            "bri": 0,
+                            "timeout": 30000,
+                        },
+                        "group": {
+                            "id": 7,
+                            "name": "Spare_room"
+                        }
+                    });
                     break;
             }
         }
