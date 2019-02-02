@@ -1,5 +1,4 @@
 const version = 0.1;
-const request = require('request');
 const moment = require('moment');
 var jsdom = require("jsdom");
 const {
@@ -28,31 +27,12 @@ const timeout = {
     "temperature": 300000
 }
 log(`Initialising hue.glamis.casa version ${version}`);
-//log('Getting lights...');
-request({
-    url: `http://${hue.ip}/api/${hue.auth}/lights`,
-    method: 'GET'
-}, function (err, httpResponse, jsonLights) {
-    /*jsonLights = JSON.parse(jsonLights);
-    log('Got lights');
-    log('Switching off all lights...');
-    for (var light in jsonLights) {
-        log(`Switching off ${jsonLights[light].name}...`);
-        new request({
-            url: `http://${hue.ip}/api/${hue.auth}/lights/${light}/state`,
-            method: 'PUT',
-            form: JSON.stringify({
-                "on": false
-            })
-        }, function (err, httpResponse, body) {
-            log(`Switched off ${jsonLights[light].name}`);
-        });
-    }
-    log('Switched off all lights');*/
-    log('Getting sensors...');
-    request(`http://${hue.ip}/api/${hue.auth}/sensors`, function (err, httpResponse, jsonSensors) {
+log('Getting sensors...');
+$.ajax({
+    url: `http://${hue.ip}/api/${hue.auth}/sensors`,
+}).done(function (jsonSensors) {
+    if (!checkHueResponseForErrors(jsonSensors)) {
         log('Got sensors');
-        jsonSensors = JSON.parse(jsonSensors);
         var jsonMotionSensors = {};
         var jsonTemperatureSensors = {};
         for (var sensor in jsonSensors) {
@@ -91,87 +71,91 @@ request({
             setTimeout(function () {
                 log('Checking temperature sensors...');
                 log('Getting sensors...');
-                request(`http://${hue.ip}/api/${hue.auth}/sensors`, function (err, httpResponse, jsonSensors) {
-                    log('Got sensors');
-                    jsonSensors = JSON.parse(jsonSensors);
-                    for (var sensor in jsonTemperatureSensors) {
-                        if (jsonSensors[sensor].state.temperature < jsonTemperatureSensors[sensor].state.temperature.min) {
-                            jsonTemperatureSensors[sensor].state.temperature.min = jsonSensors[sensor].state.temperature;
+                $.ajax({
+                    url: `http://${hue.ip}/api/${hue.auth}/sensors`,
+                }).done(function (jsonSensors) {
+                    if (!checkHueResponseForErrors(jsonSensors)) {
+                        log('Got sensors');
+                        for (var sensor in jsonTemperatureSensors) {
+                            if (jsonSensors[sensor].state.temperature < jsonTemperatureSensors[sensor].state.temperature.min) {
+                                jsonTemperatureSensors[sensor].state.temperature.min = jsonSensors[sensor].state.temperature;
+                            }
+                            if (jsonSensors[sensor].state.temperature > jsonTemperatureSensors[sensor].state.temperature.max) {
+                                jsonTemperatureSensors[sensor].state.temperature.max = jsonSensors[sensor].state.temperature;
+                            }
+                            log(`${jsonSensors[sensor].name.replace(' Temp', '')} ${jsonSensors[sensor].state.temperature / 100}C (min: ${jsonTemperatureSensors[sensor].state.temperature.min / 100}C, max: ${jsonTemperatureSensors[sensor].state.temperature.max / 100}C)`);
                         }
-                        if (jsonSensors[sensor].state.temperature > jsonTemperatureSensors[sensor].state.temperature.max) {
-                            jsonTemperatureSensors[sensor].state.temperature.max = jsonSensors[sensor].state.temperature;
-                        }
-                        log(`${jsonSensors[sensor].name.replace(' Temp', '')} ${jsonSensors[sensor].state.temperature / 100}C (min: ${jsonTemperatureSensors[sensor].state.temperature.min / 100}C, max: ${jsonTemperatureSensors[sensor].state.temperature.max / 100}C)`);
+                        log('Checked temperature sensors');
+                        log(`Checking temperature sensors in ${timeout.temperature}ms`);
+                        checkTemperatureSensors();
                     }
-                    log('Checked temperature sensors');
-                    log(`Checking temperature sensors in ${timeout.temperature}ms`);
-                    checkTemperatureSensors();
+                }).fail(function () {
+                    console.error('Error');
                 });
             }, timeout.temperature)
         }
 
         function checkMotionSensors() {
             setTimeout(function () {
-                request(`http://${hue.ip}/api/${hue.auth}/sensors`, function (err, httpResponse, jsonSensors) {
-                    if (err === null) {
-                        jsonSensors = JSON.parse(jsonSensors);
+                $.ajax({
+                    url: `http://${hue.ip}/api/${hue.auth}/sensors`,
+                }).done(function (jsonSensors) {
+                    if (!checkHueResponseForErrors(jsonSensors)) {
                         for (var sensor in jsonMotionSensors) {
-                            if (sensor === '50') { // PLEX @ Spare Room
+                            /*if (sensor === '50') { // PLEX @ Spare Room
                                 var time = new moment().subtract(30, 'seconds');
-                                if (moment(jsonSensors[sensor].state.lastupdated).isAfter(time)) {                                    
+                                if (moment(jsonSensors[sensor].state.lastupdated).isAfter(time)) {
                                     doRequest(sensor);
+        
                                     function doRequest(sensor) {
                                         log('PLEX - Getting data...');
-                                        request({
+                                        $.ajax({
                                             url: `http://${plex.host}/status/sessions`,
-                                            method: 'GET',
-                                            qs: {
+                                            data: {
                                                 "X-Plex-Token": plex.auth
-                                            },
-                                        }, function (err, httpResponse, xml) {
-                                            if (err === null) {
-                                                if ($(xml).find('Video').length) {
-                                                    log(`PLEX - Videos found. Checking for machineIdentifier ${plex.machineIdentifier}...`);
-                                                    var ps4Found = false;
-                                                    $(xml).find('Player').each(function (index, player) {
-                                                        if ($(player).attr('machineIdentifier') === plex.machineIdentifier) {
-                                                            log(`PLEX - machineIdentifier ${plex.machineIdentifier} found`);
-                                                            ps4Found = true;
-                                                            return false;
-                                                        }
-                                                    });
-                                                    if (!ps4Found) {
-                                                        log(`PLEX - machineIdentifier ${plex.machineIdentifier} not found`);
-                                                        isMotionDetected(sensor);
+                                            }
+                                        }).done(function(xml){
+                                            if ($(xml).find('Video').length) {
+                                                log(`PLEX - Videos found. Checking for machineIdentifier ${plex.machineIdentifier}...`);
+                                                var ps4Found = false;
+                                                $(xml).find('Player').each(function (index, player) {
+                                                    if ($(player).attr('machineIdentifier') === plex.machineIdentifier) {
+                                                        log(`PLEX - machineIdentifier ${plex.machineIdentifier} found`);
+                                                        ps4Found = true;
+                                                        return false;
                                                     }
-                                                } else {
-                                                    log('PLEX - No videos found');
-                                                    console.log(`passing in ${sensor}`);
+                                                });
+                                                if (!ps4Found) {
+                                                    log(`PLEX - machineIdentifier ${plex.machineIdentifier} not found`);
                                                     isMotionDetected(sensor);
                                                 }
                                             } else {
-                                                log('Error');
+                                                log('PLEX - No videos found');
+                                                console.log(`passing in ${sensor}`);
+                                                isMotionDetected(sensor);
                                             }
+                                        }).fail(function(){
+                                            console.error('Error');
                                         });
                                     }
                                 } else {
                                     isMotionDetected(sensor);
                                 }
-                            } else {
-                                isMotionDetected(sensor);
-                            }
+                            } else {*/
+                            isMotionDetected(sensor);
+                            //}
                         }
                         checkMotionSensors();
-                    } else {
-                        log('Error');
-                    }
 
-                    function isMotionDetected(sensor) {
-                        if ( /*moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated) && */ jsonSensors[sensor].state.presence !== false) {
-                            jsonMotionSensors[sensor].state.lastupdated = jsonSensors[sensor].state.lastupdated;
-                            motionDetected(sensor);
+                        function isMotionDetected(sensor) {
+                            if ( /*moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated) && */ jsonSensors[sensor].state.presence !== false) {
+                                jsonMotionSensors[sensor].state.lastupdated = jsonSensors[sensor].state.lastupdated;
+                                motionDetected(sensor);
+                            }
                         }
                     }
+                }).fail(function () {
+                    console.error('Error');
                 });
             }, timeout.motion);
         }
@@ -189,53 +173,44 @@ request({
             function motionDetected_action(int) {
                 if (!global[`groupOn${options.group.id}`]) {
                     log(`Switching ${options.group.name} lights to ${options[`time${int}`].name} mode...`);
-                    request({
+                    $.ajax({
                         url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
                         method: 'PUT',
-                        form: JSON.stringify({
+                        dataType: 'json',
+                        data: JSON.stringify({
                             "hue": options[`time${int}`].hue,
                             "sat": options[`time${int}`].sat,
                             "on": true,
                             "bri": options[`time${int}`].bri
                         })
-                    }, function (err, httpResponse, body) {
-                        body = JSON.parse(body);
-                        if (err === null) {
-                            if ('error' in body) {
-                                log(body);
-                            } else {
-                                global[`groupOn${options.group.id}`] = true;
-                                log(`Switched ${options.group.name} lights to ${options[`time${int}`].name} mode`);
-                                if (typeof global[`timeout${options.group.name}`] === 'object') {
-                                    clearTimeout(global[`timeout${options.group.name}`]);
-                                }
-                                log(`Switching off ${options.group.name} lights in ${options[`time${int}`].timeout}ms`);
-                                global[`timeout${options.group.name}`] = setTimeout(function () {
-                                    log(`Switching off ${options.group.name} lights...`);
-                                    request({
-                                        url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
-                                        method: 'PUT',
-                                        form: JSON.stringify({
-                                            "on": false
-                                        })
-                                    }, function (err, httpResponse, body) {
-                                        body = JSON.parse(body);
-                                        if (err === null) {
-                                            if ('error' in body) {
-                                                log(body);
-                                            } else {
-                                                global[`groupOn${options.group.id}`] = false;
-                                                log(`Switched off ${options.group.name} lights`);
-                                            }
-                                        } else {
-                                            log('Error');
-                                        }
-                                    });
-                                }, options[`time${int}`].timeout);
+                    }).done(function (body) {
+                        if (!checkHueResponseForErrors(body)) {
+                            global[`groupOn${options.group.id}`] = true;
+                            log(`Switched ${options.group.name} lights to ${options[`time${int}`].name} mode`);
+                            if (typeof global[`timeout${options.group.name}`] === 'object') {
+                                clearTimeout(global[`timeout${options.group.name}`]);
                             }
-                        } else {
-                            log('Error');
+                            log(`Switching off ${options.group.name} lights in ${options[`time${int}`].timeout}ms`);
+                            global[`timeout${options.group.name}`] = setTimeout(function () {
+                                log(`Switching off ${options.group.name} lights...`);
+                                $.ajax({
+                                    url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
+                                    method: 'PUT',
+                                    data: JSON.stringify({
+                                        "on": false
+                                    })
+                                }).done(function (body) {
+                                    if (!checkHueResponseForErrors(body)) {
+                                        global[`groupOn${options.group.id}`] = false;
+                                        log(`Switched off ${options.group.name} lights`);
+                                    }
+                                }).fail(function () {
+                                    console.error('Error');
+                                });
+                            }, options[`time${int}`].timeout);
                         }
+                    }).fail(function () {
+                        console.error('Error');
                     });
                 }
             }
@@ -391,18 +366,10 @@ request({
                     break;
             }
         }
-    });
+    }
+}).fail(function () {
+    log('Error');
 });
-
-function putGroup(options, callback){
-    request({
-        url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
-        method: 'PUT',
-        form: JSON.stringify(options.form)
-    }, function (err, httpResponse, body) {
-        callback = {err, httpResponse, body}
-    });
-}
 
 function log(msg) {
     console.log(`${timestamp()} ${msg}`);
@@ -411,4 +378,19 @@ function log(msg) {
 function timestamp() {
     var now = new moment();
     return `[${now.format('HH:mm:ss')}]`;
+}
+
+function checkHueResponseForErrors(json) {
+    var errFound = false;
+    $(json).each(function (index, obj) {
+        if ('error' in obj) {
+            arrFound = true;
+            log(`[ERROR] type ${obj.error.type} ${obj.error.address} ${obj.error.description}`);
+        }
+    });
+    if (errFound) {
+        return true;
+    } else {
+        return false;
+    }
 }
