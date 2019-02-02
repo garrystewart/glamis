@@ -1,6 +1,18 @@
 const version = 0.1;
 const request = require('request');
 const moment = require('moment');
+var jsdom = require("jsdom");
+const {
+    JSDOM
+} = jsdom;
+const {
+    window
+} = new JSDOM();
+const {
+    document
+} = (new JSDOM('')).window;
+global.document = document;
+var $ = jQuery = require('jquery')(window);
 const hue = {
     "ip": "192.168.0.10",
     "auth": "3EDLjI53lNqL14auInL0Xb7xd3Mg6inL4uc7oxTR"
@@ -8,17 +20,13 @@ const hue = {
 const plex = {
     "host": "plex.glamis.casa",
     "auth": "519pREE6zNyxCqVoxiDb",
-    "port": 32400,
     "machineIdentifier": "knr89e14lyk4g4n6tvo3xqfo",
 }
 const timeout = {
     "motion": 1000,
-    "plex": 1000,
+    "plex": 10000,
     "temperature": 300000
 }
-const motionTimeout = 1000;
-const plexTimeout = 1000;
-const temperatureTimeout = 300000;
 log(`Initialising hue.glamis.casa version ${version}`);
 //log('Getting lights...');
 request({
@@ -96,69 +104,76 @@ request({
                         log(`${jsonSensors[sensor].name.replace(' Temp', '')} ${jsonSensors[sensor].state.temperature / 100}C (min: ${jsonTemperatureSensors[sensor].state.temperature.min / 100}C, max: ${jsonTemperatureSensors[sensor].state.temperature.max / 100}C)`);
                     }
                     log('Checked temperature sensors');
-                    log(`Checking temperature sensors in ${temperatureTimeout}ms`);
+                    log(`Checking temperature sensors in ${timeout.temperature}ms`);
                     checkTemperatureSensors();
                 });
-            }, temperatureTimeout)
+            }, timeout.temperature)
         }
 
         function checkMotionSensors() {
             setTimeout(function () {
                 request(`http://${hue.ip}/api/${hue.auth}/sensors`, function (err, httpResponse, jsonSensors) {
-                    jsonSensors = JSON.parse(jsonSensors);
-                    for (var sensor in jsonMotionSensors) {
-                        /*if (sensor === '50') { // spare room plex code
-                            var time = new moment().subtract(5, 'minutes');
-                            if (moment(jsonSensors[sensor].state.lastupdated).isAfter(time)) { // start checking plex
-                                /*checkPlex();
-
-                                function checkPlex() {
-                                    timeoutPlex = setTimeout(function () {
-                                        checkPlex();
-                                    }, timeout.plex);
-                                }
-                                if (moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated)) {
-                                    //clearTimeout(timeoutPlex);
-                                    motionDetected(sensor);
-                                }
-                            } else { // stop checking plex if already started and follow normal rules
-                                if (moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated)) {
-                                    //clearTimeout(timeoutPlex);
-                                    motionDetected(sensor);
-                                }
-                            }
-                        } else {*/
-                            //if (sensor === '46') {
-                            //console.log(`Last updated: ${jsonSensors[sensor].state.lastupdated}`);
-                            //console.log(jsonMotionSensors[sensor].state.lastupdated);
-                            //console.log(`Presence: ${jsonSensors[sensor].state.presence}`);
-                            if (moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated) /* && jsonSensors[sensor].state.presence !== false*/ ) {
-                                // send signal back to bridge to change presence to false. otherwise, if you continue to walk around, presence will never change from true and eventually
-                                // timer will kick in a lights will go out. You'd need to stand still for 10 seconds for presence to reset
-                                log(`Changing ${jsonMotionSensors[sensor].name} sensor presence to false...`);
-                                request({
-                                    url: `http://${hue.ip}/api/${hue.auth}/sensors/${sensor}/state`,
-                                    method: 'PUT',
-                                    form: JSON.stringify({
-                                        "presence": false
-                                    })
-                                }, function (err, httpResponse, body) {
-                                    if (err === null) {
-                                        log(body);
-                                        log(`Changed ${jsonMotionSensors[sensor].name} sensor presence to false`);
-                                    } else {
-                                        log('Error');
+                    if (err === null) {
+                        jsonSensors = JSON.parse(jsonSensors);
+                        for (var sensor in jsonMotionSensors) {
+                            if (sensor === '50') { // PLEX @ Spare Room
+                                var time = new moment().subtract(30, 'seconds');
+                                if (moment(jsonSensors[sensor].state.lastupdated).isAfter(time)) {                                    
+                                    doRequest(sensor);
+                                    function doRequest(sensor) {
+                                        log('PLEX - Getting data...');
+                                        request({
+                                            url: `http://${plex.host}/status/sessions`,
+                                            method: 'GET',
+                                            qs: {
+                                                "X-Plex-Token": plex.auth
+                                            },
+                                        }, function (err, httpResponse, xml) {
+                                            if (err === null) {
+                                                if ($(xml).find('Video').length) {
+                                                    log(`PLEX - Videos found. Checking for machineIdentifier ${plex.machineIdentifier}...`);
+                                                    var ps4Found = false;
+                                                    $(xml).find('Player').each(function (index, player) {
+                                                        if ($(player).attr('machineIdentifier') === plex.machineIdentifier) {
+                                                            log(`PLEX - machineIdentifier ${plex.machineIdentifier} found`);
+                                                            ps4Found = true;
+                                                            return false;
+                                                        }
+                                                    });
+                                                    if (!ps4Found) {
+                                                        log(`PLEX - machineIdentifier ${plex.machineIdentifier} not found`);
+                                                        isMotionDetected(sensor);
+                                                    }
+                                                } else {
+                                                    log('PLEX - No videos found');
+                                                    console.log(`passing in ${sensor}`);
+                                                    isMotionDetected(sensor);
+                                                }
+                                            } else {
+                                                log('Error');
+                                            }
+                                        });
                                     }
-                                });
-                                jsonMotionSensors[sensor].state.lastupdated = jsonSensors[sensor].state.lastupdated;
-                                motionDetected(sensor);
+                                } else {
+                                    isMotionDetected(sensor);
+                                }
+                            } else {
+                                isMotionDetected(sensor);
                             }
-                            //}
-                        //}
+                        }
+                        checkMotionSensors();
+                    } else {
+                        log('Error');
                     }
-                    checkMotionSensors();
+
+                    function isMotionDetected(sensor) {
+                        if ( /*moment(jsonSensors[sensor].state.lastupdated).isAfter(jsonMotionSensors[sensor].state.lastupdated) && */ jsonSensors[sensor].state.presence !== false) {
+                            jsonMotionSensors[sensor].state.lastupdated = jsonSensors[sensor].state.lastupdated;
+                            motionDetected(sensor);
+                        }
+                    }
                 });
-            }, motionTimeout);
+            }, timeout.motion);
         }
 
         function motionDetected_isBetween(options) {
@@ -172,45 +187,57 @@ request({
             }
 
             function motionDetected_action(int) {
-                log(`Switching ${options.group.name} lights to ${options[`time${int}`].name} mode...`);
-                request({
-                    url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
-                    method: 'PUT',
-                    form: JSON.stringify({
-                        "hue": options[`time${int}`].hue,
-                        "sat": options[`time${int}`].sat,
-                        "on": true,
-                        "bri": options[`time${int}`].bri
-                    })
-                }, function (err, httpResponse, body) {
-                    if (err === null) {
-                        log(body);
-                        log(`Switched ${options.group.name} lights to ${options[`time${int}`].name} mode`);
-                        if (typeof global[`timeout${options.group.name}`] === 'object') {
-                            clearTimeout(global[`timeout${options.group.name}`]);
-                        }
-                        log(`Switching off ${options.group.name} lights in ${options[`time${int}`].timeout}ms`);
-                        global[`timeout${options.group.name}`] = setTimeout(function () {
-                            log(`Switching off ${options.group.name} lights...`);
-                            request({
-                                url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
-                                method: 'PUT',
-                                form: JSON.stringify({
-                                    "on": false
-                                })
-                            }, function (err, httpResponse, body) {
-                                if (err === null) {
-                                    log(body);
-                                    log(`Switched off ${options.group.name} lights`);
-                                } else {
-                                    log('Error');
+                if (!global[`groupOn${options.group.id}`]) {
+                    log(`Switching ${options.group.name} lights to ${options[`time${int}`].name} mode...`);
+                    request({
+                        url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
+                        method: 'PUT',
+                        form: JSON.stringify({
+                            "hue": options[`time${int}`].hue,
+                            "sat": options[`time${int}`].sat,
+                            "on": true,
+                            "bri": options[`time${int}`].bri
+                        })
+                    }, function (err, httpResponse, body) {
+                        body = JSON.parse(body);
+                        if (err === null) {
+                            if ('error' in body) {
+                                log(body);
+                            } else {
+                                global[`groupOn${options.group.id}`] = true;
+                                log(`Switched ${options.group.name} lights to ${options[`time${int}`].name} mode`);
+                                if (typeof global[`timeout${options.group.name}`] === 'object') {
+                                    clearTimeout(global[`timeout${options.group.name}`]);
                                 }
-                            });
-                        }, options[`time${int}`].timeout);
-                    } else {
-                        log('Error');
-                    }
-                });
+                                log(`Switching off ${options.group.name} lights in ${options[`time${int}`].timeout}ms`);
+                                global[`timeout${options.group.name}`] = setTimeout(function () {
+                                    log(`Switching off ${options.group.name} lights...`);
+                                    request({
+                                        url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
+                                        method: 'PUT',
+                                        form: JSON.stringify({
+                                            "on": false
+                                        })
+                                    }, function (err, httpResponse, body) {
+                                        body = JSON.parse(body);
+                                        if (err === null) {
+                                            if ('error' in body) {
+                                                log(body);
+                                            } else {
+                                                global[`groupOn${options.group.id}`] = false;
+                                                log(`Switched off ${options.group.name} lights`);
+                                            }
+                                        } else {
+                                            log('Error');
+                                        }
+                                    });
+                                }, options[`time${int}`].timeout);
+                            }
+                        } else {
+                            log('Error');
+                        }
+                    });
+                }
             }
         }
 
@@ -226,7 +253,7 @@ request({
                             "hue": 0,
                             "sat": 0,
                             "bri": 254,
-                            "timeout": 900000,
+                            "timeout": 300000,
                         },
                         "time2": {
                             "time": "22:00:00",
@@ -250,7 +277,7 @@ request({
                             "hue": 0,
                             "sat": 0,
                             "bri": 254,
-                            "timeout": 900000,
+                            "timeout": 120000,
                         },
                         "time2": {
                             "time": "23:59:59",
@@ -274,7 +301,7 @@ request({
                             "hue": 0,
                             "sat": 0,
                             "bri": 254,
-                            "timeout": 900000,
+                            "timeout": 30000,
                         },
                         "time2": {
                             "time": "23:59:59",
@@ -298,7 +325,7 @@ request({
                             "hue": 0,
                             "sat": 0,
                             "bri": 254,
-                            "timeout": 900000,
+                            "timeout": 30000,
                         },
                         "time2": {
                             "time": "23:59:59",
@@ -309,7 +336,7 @@ request({
                             "timeout": 30000,
                         },
                         "group": {
-                            "id": 14,
+                            "id": 5,
                             "name": "Hallway"
                         }
                     });
@@ -322,7 +349,7 @@ request({
                             "hue": 0,
                             "sat": 0,
                             "bri": 254,
-                            "timeout": 900000,
+                            "timeout": 60000,
                         },
                         "time2": {
                             "time": "23:59:59",
@@ -366,6 +393,16 @@ request({
         }
     });
 });
+
+function putGroup(options, callback){
+    request({
+        url: `http://${hue.ip}/api/${hue.auth}/groups/${options.group.id}/action`,
+        method: 'PUT',
+        form: JSON.stringify(options.form)
+    }, function (err, httpResponse, body) {
+        callback = {err, httpResponse, body}
+    });
+}
 
 function log(msg) {
     console.log(`${timestamp()} ${msg}`);
