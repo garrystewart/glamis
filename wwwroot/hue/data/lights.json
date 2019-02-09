@@ -1,0 +1,70 @@
+[{
+    "name": "Kitchen 1",
+    "uniqueid": "00:17:88:01:04:a2:d8:62-0b"
+}, {
+    "name": "Kitchen 2",
+    "uniqueid": "00:17:88:01:04:a2:fa:45-0b"
+}, {
+    "name": "Kitchen 3",
+    "uniqueid": "00:17:88:01:04:a2:da:d7-0b"
+}, {
+    "name": "Kitchen 4",
+    "uniqueid": "00:17:88:01:04:a2:f1:6e-0b"
+}, {
+    "name": "Kitchen 5",
+    "uniqueid": "00:17:88:01:04:a2:d8:61-0b"
+}, {
+    "name": "Kitchen 6",
+    "uniqueid": "00:17:88:01:04:a2:d5:72-0b"
+}, {
+    "name": "Kitchen 7",
+    "uniqueid": "00:17:88:01:04:a2:e7:ac-0b"
+}, {
+    "name": "Hallway 1",
+    "uniqueid": "00:15:8d:00:01:cc:6e:a9-01"
+}, {
+    "name": "Hallway 2",
+    "uniqueid": "00:15:8d:00:01:c9:19:93-01"
+}, {
+    "name": "Hallway 3",
+    "uniqueid": "00:15:8d:00:01:c9:5b:79-01"
+}, {
+    "name": "Hallway 4",
+    "uniqueid": "00:15:8d:00:01:cb:c6:fc-01"
+}, {
+    "name": "Hallway 5",
+    "uniqueid": "00:17:88:01:04:a3:66:41-0b"
+}, {
+    "name": "Hallway 6",
+    "uniqueid": "00:17:88:01:04:a3:03:c9-0b"
+}, {
+    "name": "Bathroom 1",
+    "uniqueid": "00:17:88:01:04:a3:68:14-0b"
+}, {
+    "name": "Bathroom 2",
+    "uniqueid": "00:17:88:01:04:a2:f9:cf-0b"
+}, {
+    "name": "Bathroom 3",
+    "uniqueid": "00:17:88:01:04:a3:67:c4-0b"
+}, {
+    "name": "Right lamp",
+    "uniqueid": "00:17:88:01:03:df:16:46-0b"
+}, {
+    "name": "Left lamp",
+    "uniqueid": "00:17:88:01:03:dd:de:ff-0b"
+}, {
+    "name": "Living room table",
+    "uniqueid": "00:17:88:01:03:fd:bc:e4-0b"
+}, {
+    "name": "Living room couch",
+    "uniqueid": "00:17:88:01:03:85:e1:c8-0b"
+}, {
+    "name": "Spare room ceiling",
+    "uniqueid": "00:17:88:01:03:89:a4:79-0b"
+}, {
+    "name": "Back door main",
+    "uniqueid": "00:17:88:01:03:1b:35:6e-0b"
+}, {
+    "name": "Bedroom ceiling",
+    "uniqueid": "00:17:88:01:03:8d:de:e5-0b"
+}]
