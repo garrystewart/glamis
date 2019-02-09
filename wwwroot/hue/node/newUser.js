@@ -1,5 +1,3 @@
-// use this file after factory reset to generate a new user
-
 var jsdom = require("jsdom");
 const {
     JSDOM
@@ -13,7 +11,9 @@ const {
 global.document = document;
 var $ = jQuery = require('jquery')(window);
 
-$.post('http://bridge.hue.glamis.casa/api', JSON.stringify({
+var jsonConfig = require('./config.json');
+
+$.post(`http://${jsonConfig.hostname}/api`, JSON.stringify({
     devicetype: "node"
 }), function (response) {
     console.log(response); 
