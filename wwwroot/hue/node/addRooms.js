@@ -16,7 +16,7 @@ var jsonRooms = require('./rooms.json');
 
 $(jsonRooms).each(function (index, room) {
     $.ajax({
-        url: `http://${jsonConfig.hostname}/api/${jsonConfig.auth}/groups`,
+        url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/groups`,
         method: 'POST',
         async: false,
         data: JSON.stringify({
@@ -35,7 +35,7 @@ $(jsonRooms).each(function (index, room) {
 function findLightIdsByMacs(arrMacs) {
     var arrIds = [];
     $.ajax({
-        url: `http://${jsonConfig.hostname}/api/${jsonConfig.auth}/lights`,
+        url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/lights`,
         async: false
     }).done(function (response) {        
         $(arrMacs).each(function (index, mac) {

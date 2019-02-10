@@ -19,7 +19,7 @@ findLights();
 function findLights(){
     $(jsonSerials).each(function(index, serial){
         $.ajax({
-            url: `http://${jsonConfig.hostname}/api/${jsonConfig.auth}/lights`,
+            url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/lights`,
             method: 'POST',
             async: false,
             data: JSON.stringify({
@@ -33,7 +33,7 @@ function findLights(){
     });
     console.log('Waiting 40 seconds...');
     setTimeout(function(){
-        $.getJSON(`http://${jsonConfig.hostname}/api/${jsonConfig.auth}/lights`, function(response){
+        $.getJSON(`http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/lights`, function(response){
             var intTotalLights = Object.keys(jsonLights).length;
             var intLightsFound = Object.keys(response).length;
             if (intLightsFound < intTotalLights) {

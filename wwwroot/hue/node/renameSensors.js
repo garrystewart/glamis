@@ -14,9 +14,9 @@ var $ = jQuery = require('jquery')(window);
 var jsonConfig = require('./config.json');
 var jsonSensors = require('./sensors.json');
 
-$.getJSON(`http://${jsonConfig.hostname}/api/${jsonConfig.auth}/sensors`, function (response) {
+$.getJSON(`http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/sensors`, function (response) {
     for (var sensor in response) {
-        if (typeof response[sensor].uniqueid !== 'undefined') {
+        if (response[sensor].modelid === 'SML001') {
             var uniqueid = response[sensor].uniqueid;
             var uniqueidWithoutExt = uniqueid.substring(0, uniqueid.length - 5);
             var type;
@@ -34,7 +34,7 @@ $.getJSON(`http://${jsonConfig.hostname}/api/${jsonConfig.auth}/sensors`, functi
                     console.log('unknown switch type');
             }
             $.ajax({
-                url: `http://${jsonConfig.hostname}/api/${jsonConfig.auth}/sensors/${sensor}`,
+                url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/sensors/${sensor}`,
                 async: false,
                 method: 'PUT',
                 data: JSON.stringify({

@@ -12,11 +12,14 @@ global.document = document;
 var $ = jQuery = require('jquery')(window);
 
 var jsonConfig = require('./config.json');
+const rule = 71;
 
-$.post(`http://${jsonConfig.hue.hostname}/api`, JSON.stringify({
-    devicetype: "node"
-}), function (response) {
-    console.log(response); 
+$.ajax({
+    url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/rules/${rule}`,
+    method: 'DELETE',
+    async: false
+}).done(function (response) {
+    console.log(response);
 }).fail(function (err) {
     console.log(err.statusText);
 });

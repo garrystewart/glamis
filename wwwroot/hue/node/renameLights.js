@@ -14,10 +14,10 @@ var $ = jQuery = require('jquery')(window);
 var jsonConfig = require('./config.json');
 var jsonLights = require('./lights.json');
 
-$.getJSON(`http://${jsonConfig.hostname}/api/${jsonConfig.auth}/lights`, function (response) {
+$.getJSON(`http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/lights`, function (response) {
     for (var light in response){
         $.ajax({
-            url: `http://${jsonConfig.hostname}/api/${jsonConfig.auth}/lights/${light}`,
+            url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/lights/${light}`,
             async: false,
             method: 'PUT',
             data: JSON.stringify({
