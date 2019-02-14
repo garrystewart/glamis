@@ -14,12 +14,13 @@ var $ = jQuery = require('jquery')(window);
 var jsonConfig = require('./config.json');
 var jsonPlexCredits = require('./plexCredits.json');
 var intStoredState;
+var blnDefer = false;
 
 var intPlexSensor;
 
 $.ajax({
     url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/sensors`,
-    async: true,
+    async: false,
 }).done(function (response) {
     for (var sensor in response) {
         if (response[sensor].name === 'plex') {
@@ -62,16 +63,25 @@ function doPlexPoll() {
                             console.log(progressMilliseconds);
                             console.log(creditsMilliseconds);
                             if (progressMilliseconds < creditsMilliseconds) {
-                                if (intStoredState !== 2) plexSensor(2);
+                                if (intStoredState !== 2) {
+                                    blnDefer = true;
+                                    plexSensor(2);
+                                }
                                 intStoredState = 2;
                             } else {
-                                if (intStoredState !== 4) plexSensor(4);
+                                if (intStoredState !== 4) {
+                                    blnDefer = true;
+                                    plexSensor(4);
+                                }
                                 intStoredState = 4;
                             }
                             break;
                         case 'paused':
                             console.log($(player).parents('Video').attr('viewOffset'));
-                            if (intStoredState !== 3) plexSensor(3);
+                            if (intStoredState !== 3) {
+                                blnDefer = true;
+                                plexSensor(3);
+                            }
                             intStoredState = 3;
                             break;
                         default:
@@ -83,31 +93,43 @@ function doPlexPoll() {
             });
             if (!machineFound) {
                 console.log(`PLEX - machineIdentifier ${jsonConfig.plex.machineIdentifier} not found`);
-                if (intStoredState !== 0) plexSensor(0);
+                if (intStoredState !== 0) {
+                    blnDefer = true;
+                    plexSensor(0);
+                }
                 intStoredState = 0;
             }
         } else {
             console.log('PLEX - No videos found');
-            if (intStoredState !== 0) plexSensor(0);
+            if (intStoredState !== 0) {
+                blnDefer = true;
+                plexSensor(0);
+            }
             intStoredState = 0;
         }
+        if (!blnDefer) doPlexPoll();
     }).fail(function (err) {
         console.log(err.statusText);
+        doPlexPoll();
     });
-    doPlexPoll();
+
 }
 
 function plexSensor(status) {
     $.ajax({
         url: `http://${jsonConfig.hue.hostname}/api/${jsonConfig.hue.auth}/sensors/${intPlexSensor}/state`,
         method: 'PUT',
-        async: true,
+        async: false,
         data: JSON.stringify({
             "status": status
         })
     }).done(function (response) {
         console.log(response);
+        blnDefer = false;
+        doPlexPoll();
     }).fail(function (err) {
         console.log(err.statusText);
+        blnDefer = false;
+        doPlexPoll();
     });
 }
